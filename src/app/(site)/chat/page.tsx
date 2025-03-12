@@ -8,6 +8,11 @@ import ReactMarkdown from "react-markdown";
 import { AutosizeTextarea } from "@/components/ui/autosize-textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { CopyIcon } from "@/components/ui/copy";
+import { UpvoteIcon } from "@/components/ui/upvote";
+import { DownvoteIcon } from "@/components/ui/downvote";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import toast from "react-hot-toast";
 
 interface Message {
     id: number;
@@ -18,6 +23,7 @@ interface Message {
 }
 
 export default function ChatPage() {
+
     const isDesktop = useMediaQuery("(min-width: 768px)");
 
     const [messages, setMessages] = useState<Message[]>([]);
@@ -82,6 +88,9 @@ export default function ChatPage() {
         scrollToBottom();
     }, [messages]);
 
+
+
+
     return (
         <div className="w-full max-w-5xl mx-auto flex flex-col p-4 h-dvh max-h-screen">
             <h1 className="text-center text-2xl font-semibold mb-4">Chat với AI</h1>
@@ -113,42 +122,126 @@ export default function ChatPage() {
                                         <AvatarFallback>CN</AvatarFallback>
                                     </Avatar>
                                 )}
-                                <div
-                                    className={`p-3 max-w-sm ${msg.sender === "user"
-                                        ? "bg-blue-500 text-white rounded-s-lg rounded-br-lg"
-                                        : "bg-gray-300 text-black dark:bg-gray-700 dark:text-white rounded-e-lg rounded-bl-lg"
-                                        }`}
-                                >
-                                    {msg.sender === "bot" ? (
-                                        <>
-                                            <p className="font-semibold text-sm">Vietravel - Chatbot AI</p>
-                                            <ReactMarkdown>
-                                                {msg.text}
-                                            </ReactMarkdown>
-                                        </>
-                                    ) : (
-                                        msg.text
+                                <div>
+                                    <div
+                                        className={`p-3 max-w-sm ${msg.sender === "user"
+                                            ? "bg-blue-500 text-white rounded-s-lg rounded-br-lg"
+                                            : "bg-gray-300 text-black dark:bg-gray-700 dark:text-white rounded-e-lg rounded-bl-lg"
+                                            }`}
+                                    >
+                                        {msg.sender === "bot" ? (
+                                            <>
+                                                <p className="font-semibold text-sm">Vietravel - Chatbot AI</p>
+                                                <ReactMarkdown>
+                                                    {msg.text}
+                                                </ReactMarkdown>
+                                            </>
+                                        ) : (
+                                            msg.text
+                                        )}
+                                    </div>
+                                    {msg.sender === "bot" && (
+                                        <div className="flex justify-start items-center mt-2">
+                                            <Tooltip>
+                                                <TooltipProvider>
+                                                    <TooltipTrigger
+                                                        onClick={() => {
+                                                            navigator.clipboard.writeText(msg.text);
+                                                            toast.success("Đã sao chép tin nhắn!");
+                                                        }}
+                                                    >
+                                                        <CopyIcon size={14} />
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        Sao chép tin nhắn
+                                                    </TooltipContent>
+                                                </TooltipProvider>
+                                            </Tooltip>
+                                            <Tooltip>
+                                                <TooltipProvider>
+                                                    <TooltipTrigger
+                                                        onClick={() => {
+                                                            toast.success("Cảm ơn bạn đã phản hồi!");
+                                                        }}
+                                                    >
+                                                        <UpvoteIcon size={14} />
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        Phản hồi tốt
+                                                    </TooltipContent>
+                                                </TooltipProvider>
+                                            </Tooltip>
+                                            <Tooltip>
+                                                <TooltipProvider>
+                                                    <TooltipTrigger
+                                                        onClick={() => {
+                                                            toast.success("Cảm ơn bạn đã phản hồi!");
+                                                        }}>
+                                                        <DownvoteIcon size={14} />
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        Phản hồi không tốt
+                                                    </TooltipContent>
+                                                </TooltipProvider>
+                                            </Tooltip>
+                                        </div>
                                     )}
                                 </div>
                                 <div className="text-xs text-muted-foreground mb-1">{msg.timestamp}</div>
                             </>
                         ) : (
                             <>
-                                <div
-                                    className={`p-3 max-w-sm ${msg.sender === "user"
-                                        ? "bg-blue-500 text-white rounded-s-lg rounded-br-lg"
-                                        : "bg-gray-300 text-black dark:bg-gray-700 dark:text-white rounded-e-lg rounded-bl-lg"
-                                        }`}
-                                >
-                                    {msg.sender === "bot" ? (
-                                        <>
-                                            <p className="font-semibold text-sm">Vietravel - Chatbot AI</p>
-                                            <ReactMarkdown>
-                                                {msg.text}
-                                            </ReactMarkdown>
-                                        </>
-                                    ) : (
-                                        msg.text
+                                <div>
+                                    <div
+                                        className={`p-3 max-w-sm ${msg.sender === "user"
+                                            ? "bg-blue-500 text-white rounded-s-lg rounded-br-lg"
+                                            : "bg-gray-300 text-black dark:bg-gray-700 dark:text-white rounded-e-lg rounded-bl-lg"
+                                            }`}
+                                    >
+                                        {msg.sender === "bot" ? (
+                                            <>
+                                                <p className="font-semibold text-sm">Vietravel - Chatbot AI</p>
+                                                <ReactMarkdown>
+                                                    {msg.text}
+                                                </ReactMarkdown>
+                                            </>
+                                        ) : (
+                                            msg.text
+                                        )}
+                                    </div>
+                                    {msg.sender === "bot" && (
+                                        <div className="flex justify-start items-center mt-2">
+                                            <Tooltip>
+                                                <TooltipProvider>
+                                                    <TooltipTrigger>
+                                                        <CopyIcon size={14} />
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        Sao chép tin nhắn
+                                                    </TooltipContent>
+                                                </TooltipProvider>
+                                            </Tooltip>
+                                            <Tooltip>
+                                                <TooltipProvider>
+                                                    <TooltipTrigger>
+                                                        <UpvoteIcon size={14} />
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        Phản hồi tốt
+                                                    </TooltipContent>
+                                                </TooltipProvider>
+                                            </Tooltip>
+                                            <Tooltip>
+                                                <TooltipProvider>
+                                                    <TooltipTrigger>
+                                                        <DownvoteIcon size={14} />
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        Phản hồi không tốt
+                                                    </TooltipContent>
+                                                </TooltipProvider>
+                                            </Tooltip>
+                                        </div>
                                     )}
                                 </div>
                             </>
