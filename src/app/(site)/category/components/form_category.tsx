@@ -45,12 +45,12 @@ export default function FormCategory() {
 
         toast.promise(
             insertCategory(requestData),
-            {
-                loading: "Đang thêm mới danh mục",
-                success: "Thêm mới danh mục thành công",
-                error: (error: any) => error.message || "Thêm mới danh mục thất bại, vui lòng thử lại sau"
-            }
-        )
+                    {
+                        loading: "Đang thêm mới danh mục",
+                        success: "Thêm mới danh mục thành công",
+                        error: (error: any) => error.message || "Thêm mới danh mục thất bại, vui lòng thử lại sau"
+                    }
+                )
     }
 
     return (

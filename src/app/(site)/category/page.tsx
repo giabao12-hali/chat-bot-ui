@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
-import { deleteByCategoryId, getCategories } from '@/api/category/category.service'
+import { deleteByCategoryId, getByCategoryId, getCategories } from '@/api/category/category.service'
 import { useMediaQuery } from '@/hooks/use-media-query'
 import { CategoryBaseModel } from '@/types/models/category.model'
 import React, { useEffect, useState } from 'react'
@@ -36,6 +36,8 @@ export default function CategoryPage() {
 
     const [openAlertDialog, setOpenAlertDialog] = useState<boolean>(false)
     const [openEditDialog, setOpenEditDialog] = useState<boolean>(false)
+
+    const [selectedCategory, setSelectedCategory] = useState<CategoryBaseModel | null >(null);
     const [selectedId, setSelectedId] = useState<number | null>(null);
 
     useEffect(() => {
@@ -68,6 +70,18 @@ export default function CategoryPage() {
             }
         )
     }
+
+    const handleEditCategory = async (id: number) => {
+        try {
+            const response = await getByCategoryId(id);
+            setSelectedCategory(response);
+            setOpenEditDialog(true);
+        } catch (error) {
+            console.error("❌ Lỗi khi lấy thông tin danh mục:", error);
+            toast.error("Không thể tải thông tin danh mục.");
+        }
+    };
+
 
     return (
         <>
@@ -158,6 +172,7 @@ export default function CategoryPage() {
                                                             variant={"outline"}
                                                             size={"icon"}
                                                             onClick={() => {
+                                                                handleEditCategory(item.id);
                                                                 setOpenEditDialog(true);
                                                             }}
                                                         >
@@ -208,7 +223,7 @@ export default function CategoryPage() {
                         </DialogDescription>
                     </DialogHeader>
                     <div>
-                        <FormEditCategory category={categories} />
+                        <FormEditCategory category={categories} selectedCategory={selectedCategory} onClose={() => setOpenEditDialog(false)}/>
                     </div>
                 </DialogContent>
             </Dialog>

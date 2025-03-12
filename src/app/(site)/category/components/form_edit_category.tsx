@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { CategoryBaseModel } from '@/types/models/category.model'
 import { getRememberMe } from '@/utils/cookie'
 import { zodResolver } from '@hookform/resolvers/zod'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { z } from 'zod'
@@ -27,17 +27,30 @@ const formSchema = z.object({
 
 interface FormEditCategoryProps {
     category: CategoryBaseModel[]
+    selectedCategory: CategoryBaseModel | null
+    onClose: () => void;
 }
 
-export default function FormEditCategory({ category }: FormEditCategoryProps) {
+export default function FormEditCategory({ category, selectedCategory, onClose }: FormEditCategoryProps) {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            category_id: '',
-            name: '',
-            description: '',
+            category_id: selectedCategory ? selectedCategory.id.toString() : '',
+            name: selectedCategory ? selectedCategory.name : '',
+            description: selectedCategory ? selectedCategory.description : '',
         }
     })
+
+    useEffect(() => {
+        if (selectedCategory) {
+            form.reset({
+                category_id: selectedCategory.id.toString(),
+                name: selectedCategory.name,
+                description: selectedCategory.description || "",
+            });
+        }
+    }, [selectedCategory, form]);
+
 
     function onSubmit(data: z.infer<typeof formSchema>) {
         const user = getRememberMe();
@@ -45,18 +58,24 @@ export default function FormEditCategory({ category }: FormEditCategoryProps) {
         const requestData = {
             name: data.name,
             description: data.description,
-            category_id: parseInt(data.category_id, 10),
+            category_id: selectedCategory?.id || 0,
             user_id: userId
         }
 
         toast.promise(
-            updateCategory(requestData),
+            updateCategory(requestData)
+                .then(() => {
+                    onClose();
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                }),
             {
-                loading: 'Đang cập nhật danh mục',
-                success: 'Cập nhật danh mục thành công',
-                error: (error: any) => error.message || 'Cập nhật danh mục thất bại, vui lòng thử lại sau'
+                loading: 'Đang cập nhật danh mục...',
+                success: 'Cập nhật danh mục thành công!',
+                error: (error: any) => error.message || 'Cập nhật thất bại, vui lòng thử lại!'
             }
-        )
+        );
     }
 
     return (
@@ -108,9 +127,9 @@ export default function FormEditCategory({ category }: FormEditCategoryProps) {
                                     Danh mục <span className='text-destructive-foreground'>(*)</span>
                                 </FormLabel>
                                 <FormControl>
-                                    <Select onValueChange={field.onChange}>
+                                    <Select onValueChange={field.onChange} disabled>
                                         <SelectTrigger className='w-full'>
-                                            <SelectValue placeholder="Chọn danh mục" />
+                                            <SelectValue placeholder={selectedCategory?.name || "Chọn danh mục"} />
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectGroup>

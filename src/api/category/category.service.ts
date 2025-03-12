@@ -62,3 +62,20 @@ export const deleteByCategoryId = async(category_id: number): Promise<number> =>
         throw new Error(error)
     }
 }
+
+export const getByCategoryId = async(category_id: number): Promise<CategoryBaseModel> => {
+    try {
+        const response = await serverApi.get<CategoryBaseModel>(
+            `/api/v1/get-by-category-id`,
+            {
+                params: {
+                    category_id
+                }
+            }
+        )
+        return response.data
+    } catch (error: any) {
+        console.error(error)
+        throw new Error(error)
+    }
+}
