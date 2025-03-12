@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
-import { activeKnowledge, deleteKnowledgeReourceId, getKnowledgeResourceAll } from '@/api/knowledge/knowledge.service'
+import { activeKnowledge, deleteKnowledgeReourceId, getKnowledgeResource, getKnowledgeResourceAll } from '@/api/knowledge/knowledge.service'
 import { Button } from '@/components/ui/button'
 import { DeleteIcon } from '@/components/ui/delete'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -27,6 +27,23 @@ import FormKnowledge from './components/form_knowledge'
 import { useMediaQuery } from '@/hooks/use-media-query'
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer'
 import { CheckIcon } from '@/components/ui/check'
+import { Separator } from '@/components/ui/separator'
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import { SearchIcon } from '@/components/ui/search'
+import { Checkbox } from '@/components/ui/checkbox'
+import { CategoryBaseModel } from '@/types/models/category.model'
+import { ResourceModel } from '@/types/models/resource.model'
+import { getCategories } from '@/api/category/category.service'
+import { getResources } from '@/api/resource/resource.service'
+
 
 
 
@@ -37,26 +54,41 @@ export default function KnowledgePage() {
     const [error, setError] = useState<string>('')
 
     const [knowledge, setKnowledge] = useState<KnowledgeBaseModel[]>([])
+    const [categories, setCategories] = useState<CategoryBaseModel[]>([])
+    const [resources, setResources] = useState<ResourceModel[]>([]);
+
+    const [searchParams, setSearchParams] = useState({
+        resource_id: "",
+        categories_id: "",
+        is_active: false
+    })
 
     const [openAlertDialog, setOpenAlertDialog] = useState<boolean>(false)
     const [selectedId, setSelectedId] = useState<number | null>(null);
 
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 12;
+    const itemsPerPage = 9;
 
     useEffect(() => {
-        const getKnowledgeAll = async () => {
+        const getDatas = async () => {
             try {
                 setLoading(true)
-                const response = await getKnowledgeResourceAll();
-                setKnowledge(response)
+                const [knowledgeRes, categoryRes, resourceRes] = await Promise.all([
+                    getKnowledgeResourceAll(),
+                    getCategories(),
+                    getResources(),
+                ]);
+
+                setKnowledge(knowledgeRes);
+                setCategories(categoryRes);
+                setResources(resourceRes);
             } catch (error: any) {
-                setError(error.message)
+                setError(error.message || 'Đã có lỗi xảy ra, vui lòng thử lại sau')
             } finally {
                 setLoading(false)
             }
         }
-        getKnowledgeAll()
+        getDatas()
     }, [])
 
     const handleDeleteKnowledge = async () => {
@@ -94,6 +126,22 @@ export default function KnowledgePage() {
         );
     };
 
+    const handleSearch = async () => {
+        try {
+            setLoading(true);
+            const response = await getKnowledgeResource(
+                searchParams.resource_id ? parseInt(searchParams.resource_id) : 0,
+                searchParams.categories_id ? parseInt(searchParams.categories_id) : 0,
+                searchParams.is_active
+            );
+            setKnowledge(response ? [response] : []);
+        } catch (error: any) {
+            setError(error.message || "Lỗi khi tìm kiếm!");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     //#region Phân trang
     // ✅ Tính toán số trang
     const totalPages = Math.ceil(knowledge.length / itemsPerPage);
@@ -124,7 +172,8 @@ export default function KnowledgePage() {
                     </div>
                 ) : (
                     <>
-                        <div>
+                        <section className='flex items-center justify-between'>
+                            <h1 className='text-xl font-semibold'>Danh sách kiến thức</h1>
                             {isDesktop ? (
                                 <Dialog>
                                     <DialogTrigger asChild>
@@ -170,13 +219,76 @@ export default function KnowledgePage() {
                                     </DrawerContent>
                                 </Drawer>
                             )}
-                        </div>
+                        </section>
+                        <Separator />
+                        <section className='space-y-6'>
+                            <div className='flex items-center justify-center gap-4 flex-col md:flex-row'>
+                                <Select
+                                    onValueChange={(value) =>
+                                        setSearchParams((prev: any) => ({
+                                            ...prev,
+                                            categories_id: value
+                                        }))
+                                    }
+                                >
+                                    <SelectTrigger className="w-52">
+                                        <SelectValue placeholder="Chọn danh mục" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>Danh mục</SelectLabel>
+                                            {categories.map((category, index) => (
+                                                <SelectItem key={index} value={category.id.toString()}>
+                                                    {category.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                                <Select onValueChange={(value) => setSearchParams((prev: any) => ({ ...prev, resource_id: value }))}>
+                                    <SelectTrigger className="w-52">
+                                        <SelectValue placeholder="Chọn nguồn kiến thức" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>Nguồn kiến thức</SelectLabel>
+                                            {resources.map((resource, index) => (
+                                                <SelectItem key={index} value={resource.id.toString()}>
+                                                    {resource.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox
+                                        id="active"
+                                        checked={searchParams.is_active}
+                                        onCheckedChange={(checked) => setSearchParams((prev: any) => ({ ...prev, is_active: checked === true }))}
+                                    />
+                                    <label
+                                        htmlFor="active"
+                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                    >
+                                        Kích hoạt
+                                    </label>
+                                </div>
+                            </div>
+                            <div className="flex justify-center items-center">
+                                <Button size={'sm'} variant={'outline'} className='cursor-pointer' onClick={handleSearch}>
+                                    <SearchIcon className='hover:bg-transparent' />
+                                    Tìm kiếm
+                                </Button>
+                            </div>
+                        </section>
                         <div className="grid auto-rows-min gap-4 md:grid-cols-3 grid-cols-1">
                             {paginatedData.map((item, index) => (
                                 <div key={index}>
-                                    <div className="rounded-xl border border-solid border-foreground/50 p-4 space-y-2">
+                                    <div
+                                        className="rounded-xl border border-solid border-foreground/50 p-4 space-y-2 transition-all ease-in-out hover:shadow-xl hover:border-foreground hover:-translate-1.5"
+                                    >
                                         <div className='space-y-0.5'>
-                                            <h1 className='font-semibold'>
+                                            <h1 className='font-semibold text-foreground'>
                                                 {item.title}
                                             </h1>
                                             <h2 className='text-muted-foreground text-xs truncate'>

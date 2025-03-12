@@ -138,10 +138,17 @@ export default function CategoryPage() {
                         <div className="grid auto-rows-min gap-4 md:grid-cols-3">
                             {categories.map((item) => (
                                 <div key={item.id}>
-                                    <div className="rounded-xl border border-solid border-foreground/50 p-4">
+                                    <div
+                                        className="rounded-xl border border-solid border-foreground/50 p-4 space-y-2 transition-all ease-in-out hover:shadow-xl hover:border-foreground hover:-translate-1.5"
+                                    >
                                         <div className="space-y-0.5">
-
-                                            {item.name}
+                                            <h1 className='font-semibold text-foreground'>
+                                                {item.name}
+                                            </h1>
+                                            <h2 className='text-xs text-muted-foreground'>
+                                                Mô tả:&nbsp;
+                                                {item.description}
+                                            </h2>
                                         </div>
                                         <div className="flex justify-end items-center space-x-2">
                                             <TooltipProvider>
@@ -201,7 +208,7 @@ export default function CategoryPage() {
                         </DialogDescription>
                     </DialogHeader>
                     <div>
-                        <FormEditCategory category={categories}/>
+                        <FormEditCategory category={categories} />
                     </div>
                 </DialogContent>
             </Dialog>

@@ -80,3 +80,22 @@ export const activeKnowledge = async(knowledge_resource_id: number): Promise<num
         throw new Error(error);
     }
 }
+
+export const getKnowledgeResource = async(resource_id: number, category_id: number, is_active: boolean): Promise<KnowledgeBaseModel> => {
+    try {
+        const response = await serverApi.get<KnowledgeBaseModel>(
+            `/api/v1/get-knowledge-resource`,
+            {
+                params: {
+                    resource_id,
+                    category_id,
+                    is_active
+                }
+            }
+        )
+        return response.data;
+    } catch (error: any) {
+        console.error(error);
+        throw new Error(error);
+    }
+}
