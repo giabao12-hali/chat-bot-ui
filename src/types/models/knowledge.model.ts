@@ -23,3 +23,14 @@ export interface CreateKnowledgeUrlDtoModel {
   category: number;
   created_by: number;
 }
+
+export interface GetKnowledgeResourceDtoModel {
+  category_id: number;
+  is_active: number;
+  created_at: string;
+  title: string;
+  id: number;
+  url: string;
+  resource_id: number;
+  created_by: number;
+}

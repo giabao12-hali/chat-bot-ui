@@ -33,7 +33,6 @@ import {
     SelectContent,
     SelectGroup,
     SelectItem,
-    SelectLabel,
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
@@ -129,18 +128,24 @@ export default function KnowledgePage() {
     const handleSearch = async () => {
         try {
             setLoading(true);
+            // ✅ Chỉ gửi params nếu có giá trị hợp lệ
             const response = await getKnowledgeResource(
-                searchParams.resource_id ? parseInt(searchParams.resource_id) : 0,
-                searchParams.categories_id ? parseInt(searchParams.categories_id) : 0,
-                searchParams.is_active
+                searchParams.resource_id ? parseInt(searchParams.resource_id) : undefined,
+                searchParams.categories_id ? parseInt(searchParams.categories_id) : undefined,
+                searchParams.is_active ? true : undefined
             );
-            setKnowledge(response ? [response] : []);
+
+            console.log("🔍 Kết quả API:", response);
+            setKnowledge(response.length > 0 ? response : []);
         } catch (error: any) {
+            console.error("❌ Lỗi khi gọi API:", error);
             setError(error.message || "Lỗi khi tìm kiếm!");
         } finally {
             setLoading(false);
         }
     };
+
+
 
     //#region Phân trang
     // ✅ Tính toán số trang
@@ -236,7 +241,7 @@ export default function KnowledgePage() {
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectGroup>
-                                            <SelectLabel>Danh mục</SelectLabel>
+                                            <SelectItem value='0'>--Tất cả--</SelectItem>
                                             {categories.map((category, index) => (
                                                 <SelectItem key={index} value={category.id.toString()}>
                                                     {category.name}
@@ -251,7 +256,9 @@ export default function KnowledgePage() {
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectGroup>
-                                            <SelectLabel>Nguồn kiến thức</SelectLabel>
+                                            <SelectItem value='0'>
+                                                --Tất cả--
+                                            </SelectItem>
                                             {resources.map((resource, index) => (
                                                 <SelectItem key={index} value={resource.id.toString()}>
                                                     {resource.name}
@@ -293,9 +300,13 @@ export default function KnowledgePage() {
                                             </h1>
                                             <h2 className='text-muted-foreground text-xs truncate'>
                                                 Đường dẫn: {' '}
-                                                <Link href={item.url} target='_blank' className='hover:text-blue-500 transition-all ease-in-out'>
-                                                    {item.url}
-                                                </Link>
+                                                {item.url ? (
+                                                    <Link href={item.url} target='_blank' className='hover:text-blue-500 transition-all ease-in-out'>
+                                                        {item.url}
+                                                    </Link>
+                                                ) : (
+                                                    <span className="text-muted-foreground">Không có đường dẫn</span>
+                                                )}
                                             </h2>
                                             <p className='text-muted-foreground text-xs'>
                                                 Kiến thức thuộc danh mục:&nbsp;

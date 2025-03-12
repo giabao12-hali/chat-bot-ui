@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CreateKnowledgeDtoModel, CreateKnowledgeUrlDtoModel, KnowledgeBaseModel } from "@/types/models/knowledge.model";
+import { CreateKnowledgeDtoModel, CreateKnowledgeUrlDtoModel, GetKnowledgeResourceDtoModel, KnowledgeBaseModel } from "@/types/models/knowledge.model";
 import { serverApi } from "../axiosConfig";
 
 export const getKnowledgeResourceAll = async (): Promise<KnowledgeBaseModel[]> => {
@@ -81,17 +81,19 @@ export const activeKnowledge = async(knowledge_resource_id: number): Promise<num
     }
 }
 
-export const getKnowledgeResource = async(resource_id: number, category_id: number, is_active: boolean): Promise<KnowledgeBaseModel> => {
+export const getKnowledgeResource = async(resource_id?: number, category_id?: number, is_active?: boolean): Promise<GetKnowledgeResourceDtoModel[]> => {
     try {
-        const response = await serverApi.get<KnowledgeBaseModel>(
+        const params: Record<string, any> = {};
+
+        if (resource_id && resource_id > 0) params.resource_id = resource_id;
+        if (category_id && category_id > 0) params.category_id = category_id;
+        if (is_active !== undefined) params.is_active = is_active;
+
+        console.log("📤 Gửi request với params:", params);
+
+        const response = await serverApi.get<GetKnowledgeResourceDtoModel[]>(
             `/api/v1/get-knowledge-resource`,
-            {
-                params: {
-                    resource_id,
-                    category_id,
-                    is_active
-                }
-            }
+            { params }
         )
         return response.data;
     } catch (error: any) {

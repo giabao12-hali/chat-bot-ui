@@ -46,15 +46,6 @@ export default function DevPage() {
             <div id="dosbox" ref={dosRef} />
             <Button
                 onClick={() => dosbox?.requestFullScreen()}
-                // onClick={() => {
-                //     if (dosbox) {
-                //         if (document.documentElement.requestFullscreen) {
-                //             document.documentElement.requestFullscreen(); // ✅ Full toàn màn hình
-                //         } else {
-                //             alert("Trình duyệt không hỗ trợ fullscreen.");
-                //         }
-                //     }
-                // }}
                 variant={'outline'}
             >
                 Chơi fullscreen
