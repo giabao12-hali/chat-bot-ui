@@ -62,3 +62,21 @@ export const postByUrl = async(data: CreateKnowledgeUrlDtoModel): Promise<Knowle
         throw new Error(error);
     }
 }
+
+export const activeKnowledge = async(knowledge_resource_id: number): Promise<number> => {
+    try {
+        const response = await serverApi.post<number>(
+            `/api/v1/active-knowledge`,
+            {},
+            {
+                params: {
+                    knowledge_resource_id
+                }
+            }
+        )
+        return response.data;
+    } catch (error: any) {
+        console.error(error);
+        throw new Error(error);
+    }
+}

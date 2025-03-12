@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
-import { deleteKnowledgeReourceId, getKnowledgeResourceAll } from '@/api/knowledge/knowledge.service'
+import { activeKnowledge, deleteKnowledgeReourceId, getKnowledgeResourceAll } from '@/api/knowledge/knowledge.service'
 import { Button } from '@/components/ui/button'
 import { DeleteIcon } from '@/components/ui/delete'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -26,6 +26,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import FormKnowledge from './components/form_knowledge'
 import { useMediaQuery } from '@/hooks/use-media-query'
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer'
+import { CheckIcon } from '@/components/ui/check'
 
 
 
@@ -75,6 +76,24 @@ export default function KnowledgePage() {
         );
     };
 
+    const handleActiveKnowledge = async (id: number) => {
+        toast.promise(
+            activeKnowledge(id)
+                .then(() => {
+                    setKnowledge((prev) =>
+                        prev.map((item) =>
+                            item.id === id ? { ...item, is_active: 1 } : item
+                        )
+                    );
+                }),
+            {
+                loading: "Đang kích hoạt...",
+                success: "Kích hoạt thành công!",
+                error: "Kích hoạt thất bại, vui lòng thử lại!",
+            }
+        );
+    };
+
     //#region Phân trang
     // ✅ Tính toán số trang
     const totalPages = Math.ceil(knowledge.length / itemsPerPage);
@@ -84,7 +103,6 @@ export default function KnowledgePage() {
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
-
     //#endregion
 
     return (
@@ -180,7 +198,25 @@ export default function KnowledgePage() {
                                                 </span>
                                             </p>
                                         </div>
-                                        <div className="flex justify-end items-center">
+                                        <div className="flex justify-end items-center space-x-2">
+                                            {item.is_active === 0 && (
+                                                <Tooltip>
+                                                    <TooltipProvider>
+                                                        <TooltipTrigger asChild>
+                                                            <Button
+                                                                size={'icon'}
+                                                                variant={'outline'}
+                                                                onClick={() => handleActiveKnowledge(item.id)}
+                                                            >
+                                                                <CheckIcon />
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            <p>Kích hoạt kiến thức</p>
+                                                        </TooltipContent>
+                                                    </TooltipProvider>
+                                                </Tooltip>
+                                            )}
                                             <TooltipProvider>
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>
