@@ -1,0 +1,316 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+'use client'
+
+import { deleteKnowledgeReourceId, getKnowledgeResourceAll } from '@/api/knowledge/knowledge.service'
+import { Button } from '@/components/ui/button'
+import { DeleteIcon } from '@/components/ui/delete'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { KnowledgeBaseModel } from '@/types/models/knowledge.model'
+import React, { useEffect, useState } from 'react'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import toast from 'react-hot-toast'
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
+import Link from 'next/link'
+import { categoryEnums } from '@/types/enums/category.enums'
+import { Plus } from 'lucide-react'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import FormKnowledge from './components/form_knowledge'
+import { useMediaQuery } from '@/hooks/use-media-query'
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer'
+
+
+
+export default function KnowledgePage() {
+    const isDesktop = useMediaQuery("(min-width: 768px)")
+
+    const [loading, setLoading] = useState<boolean>(true)
+    const [error, setError] = useState<string>('')
+
+    const [knowledge, setKnowledge] = useState<KnowledgeBaseModel[]>([])
+
+    const [openAlertDialog, setOpenAlertDialog] = useState<boolean>(false)
+    const [selectedId, setSelectedId] = useState<number | null>(null);
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 12;
+
+    useEffect(() => {
+        const getKnowledgeAll = async () => {
+            try {
+                setLoading(true)
+                const response = await getKnowledgeResourceAll();
+                setKnowledge(response)
+            } catch (error: any) {
+                setError(error.message)
+            } finally {
+                setLoading(false)
+            }
+        }
+        getKnowledgeAll()
+    }, [])
+
+    const handleDeleteKnowledge = async () => {
+        if (selectedId === null) return;
+
+        toast.promise(
+            deleteKnowledgeReourceId(selectedId)
+                .then(() => {
+                    setKnowledge((prev) => prev.filter((item) => item.id !== selectedId));
+                    setOpenAlertDialog(false);
+                }),
+            {
+                loading: "Đang xóa dữ liệu...",
+                success: "Xóa thành công!",
+                error: (error: any) => error.message || "Xóa thất bại! Vui lòng thử lại sau",
+            }
+        );
+    };
+
+    //#region Phân trang
+    // ✅ Tính toán số trang
+    const totalPages = Math.ceil(knowledge.length / itemsPerPage);
+
+    // ✅ Lấy dữ liệu của trang hiện tại
+    const paginatedData = knowledge.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    //#endregion
+
+    return (
+        <>
+            <div className="flex flex-col gap-4 p-4">
+                {loading ? (
+                    <div className='flex justify-center items-center md:mt-56'>
+                        <div className="flex items-center space-x-2">
+                            <div className="size-4 animate-bounce rounded-full bg-foreground [animation-delay:-0.3s]"></div>
+                            <div className="size-4 animate-bounce rounded-full bg-foreground [animation-delay:-0.13s]"></div>
+                            <div className="size-4 animate-bounce rounded-full bg-foreground"></div>
+                        </div>
+                    </div>
+                ) : error ? (
+                    <div className='flex justify-center items-center'>
+                        <p>
+                            Đã có lỗi xảy ra, vui lòng thử lại sau
+                        </p>
+                    </div>
+                ) : (
+                    <>
+                        <div>
+                            {isDesktop ? (
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <Button size={"sm"} className=''>
+                                            <Plus />
+                                            Thêm mới
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                        <DialogHeader>
+                                            <DialogTitle>
+                                                Thêm mới kiến thức
+                                            </DialogTitle>
+                                            <DialogDescription>
+                                                Hãy thêm mới kiến thức thông qua thêm bằng thủ công hoặc nhập từ đường dẫn
+                                            </DialogDescription>
+                                        </DialogHeader>
+                                        <div className="flex justify-center">
+                                            <FormKnowledge />
+                                        </div>
+                                    </DialogContent>
+                                </Dialog>
+                            ) : (
+                                <Drawer>
+                                    <DrawerTrigger asChild>
+                                        <Button size={"sm"} className=''>
+                                            <Plus />
+                                            Thêm mới
+                                        </Button>
+                                    </DrawerTrigger>
+                                    <DrawerContent>
+                                        <DrawerHeader>
+                                            <DrawerTitle>
+                                                Thêm mới kiến thức
+                                            </DrawerTitle>
+                                            <DrawerDescription>
+                                                Hãy thêm mới kiến thức thông qua thêm bằng thủ công hoặc nhập từ đường dẫn
+                                            </DrawerDescription>
+                                        </DrawerHeader>
+                                        <div className="flex justify-center">
+                                            <FormKnowledge />
+                                        </div>
+                                    </DrawerContent>
+                                </Drawer>
+                            )}
+                        </div>
+                        <div className="grid auto-rows-min gap-4 md:grid-cols-3 grid-cols-1">
+                            {paginatedData.map((item, index) => (
+                                <div key={index}>
+                                    <div className="rounded-xl border border-solid border-foreground/50 p-4 space-y-2">
+                                        <div className='space-y-0.5'>
+                                            <h1 className='font-semibold'>
+                                                {item.title}
+                                            </h1>
+                                            <h2 className='text-muted-foreground text-xs truncate'>
+                                                Đường dẫn: {' '}
+                                                <Link href={item.url} target='_blank' className='hover:text-blue-500 transition-all ease-in-out'>
+                                                    {item.url}
+                                                </Link>
+                                            </h2>
+                                            <p className='text-muted-foreground text-xs'>
+                                                Kiến thức thuộc danh mục:&nbsp;
+                                                {
+                                                    categoryEnums.find((category) => category.id === item.category_id)?.name || "Không xác định"
+                                                }
+                                            </p>
+                                            <p className='text-muted-foreground text-xs'>
+                                                Trạng thái:&nbsp;
+                                                <span className={`${item.is_active ? 'text-green-500' : 'text-red-500'}`}>
+                                                    {item.is_active ? 'Đang hoạt động' : 'Không hoạt động'}
+                                                </span>
+                                            </p>
+                                        </div>
+                                        <div className="flex justify-end items-center">
+                                            <TooltipProvider>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button
+                                                            variant={'destructive'}
+                                                            size={"icon"}
+                                                            onClick={() => {
+                                                                setSelectedId(item.id);
+                                                                setOpenAlertDialog(true);
+                                                            }}
+                                                        >
+                                                            <DeleteIcon />
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p>Xóa</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <Pagination className="mt-6">
+                            <PaginationContent>
+                                <PaginationItem>
+                                    <PaginationPrevious
+                                        href="#"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            setCurrentPage((prev) => Math.max(prev - 1, 1));
+                                        }}
+                                        style={{ pointerEvents: currentPage === 1 ? 'none' : 'auto', opacity: currentPage === 1 ? 0.5 : 1 }}
+                                    />
+                                </PaginationItem>
+
+                                <PaginationItem>
+                                    <PaginationLink
+                                        href="#"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            setCurrentPage(1);
+                                        }}
+                                        isActive={currentPage === 1}
+                                    >
+                                        1
+                                    </PaginationLink>
+                                </PaginationItem>
+
+                                {currentPage > 3 && (
+                                    <PaginationItem>
+                                        <PaginationEllipsis />
+                                    </PaginationItem>
+                                )}
+
+                                {Array.from({ length: totalPages }, (_, index) => index + 1)
+                                    .filter(
+                                        (page) =>
+                                            page !== 1 &&
+                                            page !== totalPages &&
+                                            page >= currentPage - 1 &&
+                                            page <= currentPage + 1
+                                    )
+                                    .map((page) => (
+                                        <PaginationItem key={page}>
+                                            <PaginationLink
+                                                href="#"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    setCurrentPage(page);
+                                                }}
+                                                isActive={currentPage === page}
+                                            >
+                                                {page}
+                                            </PaginationLink>
+                                        </PaginationItem>
+                                    ))}
+
+                                {currentPage < totalPages - 2 && (
+                                    <PaginationItem>
+                                        <PaginationEllipsis />
+                                    </PaginationItem>
+                                )}
+
+                                {totalPages > 1 && (
+                                    <PaginationItem>
+                                        <PaginationLink
+                                            href="#"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setCurrentPage(totalPages);
+                                            }}
+                                            isActive={currentPage === totalPages}
+                                        >
+                                            {totalPages}
+                                        </PaginationLink>
+                                    </PaginationItem>
+                                )}
+
+                                <PaginationItem>
+                                    <PaginationNext
+                                        href="#"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+                                        }}
+                                        style={{ pointerEvents: currentPage === totalPages ? 'none' : 'auto', opacity: currentPage === totalPages ? 0.5 : 1 }}
+                                    />
+                                </PaginationItem>
+                            </PaginationContent>
+                        </Pagination>
+
+                    </>
+                )}
+            </div>
+            <AlertDialog open={openAlertDialog} onOpenChange={setOpenAlertDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Bạn có chắc không?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Bạn có chắc muốn xóa kiến thức này không? Hành động này không thể hoàn tác.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Hủy</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDeleteKnowledge}>Xóa</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </>
+    )
+}
