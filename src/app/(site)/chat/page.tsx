@@ -14,6 +14,7 @@ import { DownvoteIcon } from "@/components/ui/downvote";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import toast from "react-hot-toast";
 import { ArrowRightIcon } from "@/components/ui/arrow-right";
+import { motion } from "motion/react";
 
 interface Message {
     id: number;
@@ -273,13 +274,27 @@ export default function ChatPage() {
                 />
                 <Button onClick={sendMessage} disabled={loading} size={'icon'}>
                     {loading ? (
-                        <div className="flex items-center space-x-2 p-4">
-                            <div className="size-1 animate-bounce rounded-full bg-white [animation-delay:-0.3s]"></div>
-                            <div className="size-1 animate-bounce rounded-full bg-white [animation-delay:-0.13s]"></div>
-                            <div className="size-1 animate-bounce rounded-full bg-white"></div>
+                        <div className="flex items-center justify-center space-x-1">
+                            {[...Array(3)].map((_, index) => (
+                                <motion.div
+                                    key={index}
+                                    className="h-3 w-1 rounded-full bg-white"
+                                    animate={{
+                                        scaleY: [0.5, 1.5, 0.5],
+                                        scaleX: [1, 0.8, 1],
+                                        translateY: ['0%', '-15%', '0%'],
+                                    }}
+                                    transition={{
+                                        duration: 1,
+                                        repeat: Infinity,
+                                        ease: 'easeInOut',
+                                        delay: index * 0.1,
+                                    }}
+                                />
+                            ))}
                         </div>
                     ) : (
-                        <ArrowRightIcon className="hover:bg-transparent"/>
+                        <ArrowRightIcon className="hover:bg-transparent" />
                     )}
                 </Button>
             </div>
