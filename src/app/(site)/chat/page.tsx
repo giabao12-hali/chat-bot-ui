@@ -13,6 +13,7 @@ import { UpvoteIcon } from "@/components/ui/upvote";
 import { DownvoteIcon } from "@/components/ui/downvote";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import toast from "react-hot-toast";
+import { ArrowRightIcon } from "@/components/ui/arrow-right";
 
 interface Message {
     id: number;
@@ -270,8 +271,16 @@ export default function ChatPage() {
                         }
                     }}
                 />
-                <Button onClick={sendMessage} disabled={loading}>
-                    {loading ? "Đang gửi..." : "Gửi"}
+                <Button onClick={sendMessage} disabled={loading} size={'icon'}>
+                    {loading ? (
+                        <div className="flex items-center space-x-2 p-4">
+                            <div className="size-1 animate-bounce rounded-full bg-white [animation-delay:-0.3s]"></div>
+                            <div className="size-1 animate-bounce rounded-full bg-white [animation-delay:-0.13s]"></div>
+                            <div className="size-1 animate-bounce rounded-full bg-white"></div>
+                        </div>
+                    ) : (
+                        <ArrowRightIcon className="hover:bg-transparent"/>
+                    )}
                 </Button>
             </div>
         </div>

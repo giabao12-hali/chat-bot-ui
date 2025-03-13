@@ -106,7 +106,7 @@ export default function FormEditCategory({ category, selectedCategory, onClose }
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>
-                                    Mô tả danh mục <span className='text-destructive-foreground'>(*)</span>
+                                    Mô tả danh mục
                                 </FormLabel>
                                 <FormControl>
                                     <AutosizeTextarea

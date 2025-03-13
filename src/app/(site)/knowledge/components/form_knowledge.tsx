@@ -144,11 +144,11 @@ export default function FormKnowledge() {
         <>
             <Tabs defaultValue="hands" className="w-[400px]">
                 <TabsList className="grid w-full grid-cols-2 h-full">
-                    <TabsTrigger value="hands" className='h-full'>
+                    <TabsTrigger value="hands" className='h-full cursor-pointer'>
                         <SquarePenIcon className='hover:bg-transparent' />
                         Thủ công
                     </TabsTrigger>
-                    <TabsTrigger value="url">
+                    <TabsTrigger value="url" className='h-full cursor-pointer'>
                         <LinkIcon className='hover:bg-transparent' />
                         Đường dẫn
                     </TabsTrigger>
