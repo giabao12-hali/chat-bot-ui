@@ -102,9 +102,9 @@ export const getKnowledgeResource = async(resource_id?: number, category_id?: nu
     }
 }
 
-export const getKnowledgeByKnowledgeResourceId = async(id: number): Promise<GetKnowledgeResourceDetailDtoModel> => {
+export const getKnowledgeByKnowledgeResourceId = async(id: number): Promise<GetKnowledgeResourceDetailDtoModel[]> => {
     try {
-        const response = await serverApi.get<GetKnowledgeResourceDetailDtoModel>(
+        const response = await serverApi.get<GetKnowledgeResourceDetailDtoModel[]>(
             `/api/v1/get-knowledge-by-knowledge-resource-id`,
             {
                 params: {
