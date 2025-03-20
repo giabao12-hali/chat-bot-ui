@@ -34,3 +34,13 @@ export interface GetKnowledgeResourceDtoModel {
   resource_id: number;
   created_by: number;
 }
+
+export interface GetKnowledgeResourceDetailDtoModel {
+  knowledge_resource_id: number;
+  content: string;
+  embedding: string;
+  vector_id: string;
+  id: number;
+  extra_metadata: string;
+  created_at: string;
+}

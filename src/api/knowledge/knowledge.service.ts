@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CreateKnowledgeDtoModel, CreateKnowledgeUrlDtoModel, GetKnowledgeResourceDtoModel, KnowledgeBaseModel } from "@/types/models/knowledge.model";
+import { CreateKnowledgeDtoModel, CreateKnowledgeUrlDtoModel, GetKnowledgeResourceDetailDtoModel, GetKnowledgeResourceDtoModel, KnowledgeBaseModel } from "@/types/models/knowledge.model";
 import { serverApi } from "../axiosConfig";
 
 export const getKnowledgeResourceAll = async (): Promise<KnowledgeBaseModel[]> => {
@@ -98,6 +98,23 @@ export const getKnowledgeResource = async(resource_id?: number, category_id?: nu
         return response.data;
     } catch (error: any) {
         console.error(error);
+        throw new Error(error);
+    }
+}
+
+export const getKnowledgeByKnowledgeResourceId = async(id: number): Promise<GetKnowledgeResourceDetailDtoModel> => {
+    try {
+        const response = await serverApi.get<GetKnowledgeResourceDetailDtoModel>(
+            `/api/v1/get-knowledge-by-knowledge-resource-id`,
+            {
+                params: {
+                    id
+                }
+            }
+        )
+        return response.data;
+    } catch (error: any) {
+        console.log(error);
         throw new Error(error);
     }
 }
