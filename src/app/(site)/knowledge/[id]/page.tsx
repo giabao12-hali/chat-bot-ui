@@ -132,10 +132,12 @@ export default function KnowledgeDetails() {
                                     {renderContent(parseJsonContent(knowledge.content))}
                                 </div>
 
-                                <div>
-                                    <h3 className="text-md font-medium mb-1">Các thông tin khác:</h3>
-                                    {renderContent(knowledge.extra_metadata, true)}
-                                </div>
+                                {index === 0 && (
+                                    <div>
+                                        <h3 className="text-md font-medium mb-1">Các thông tin khác:</h3>
+                                        {renderContent(knowledge.extra_metadata, true)}
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>
