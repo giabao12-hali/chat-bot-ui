@@ -5,6 +5,7 @@
 import { getKnowledgeByKnowledgeResourceId } from '@/api/knowledge/knowledge.service';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { GetKnowledgeResourceDetailDtoModel } from '@/types/models/knowledge.model'
+import { Github } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react'
 
@@ -93,7 +94,7 @@ export default function KnowledgeDetails() {
             const parsed = parseMetadata(content);
             if (typeof parsed === 'object') {
                 return (
-                    <pre className="bg-gray-100 p-4 rounded-md overflow-auto">
+                    <pre className="bg-gray-100 p-4 rounded-md overflow-auto text-black">
                         {JSON.stringify(parsed, null, 2)}
                     </pre>
                 );
@@ -121,7 +122,8 @@ export default function KnowledgeDetails() {
                         </p>
                     </div>
                 ) : (
-                    <div className='w-full'>
+                    <div className='w-full space-y-4 relative'>
+
                         <h1 className='font-semibold text-center text-lg md:text-2xl'>Danh sách chi tiết kiến thức</h1>
                         {knowledgeDetails.map((knowledge, index) => (
                             <div className="border rounded-lg p-4 shadow-sm" key={index}>
@@ -141,6 +143,11 @@ export default function KnowledgeDetails() {
                     </div>
                 )}
             </div>
+            {/* <Dock direction='middle'>
+                <DockIcon>
+                    <Github />
+                </DockIcon>
+            </Dock> */}
         </>
     )
 }

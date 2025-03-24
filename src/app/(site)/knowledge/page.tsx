@@ -297,87 +297,87 @@ export default function KnowledgePage() {
                         </section>
                         <div className="grid auto-rows-min gap-4 md:grid-cols-3 grid-cols-1">
                             {paginatedData.map((item, index) => (
-                                <TooltipProvider key={index}>
-                                    <Tooltip delayDuration={500}>
-                                        <TooltipTrigger asChild>
-                                            <div onClick={() => handleKnowledgeDetail(item.id)} className='cursor-pointer'>
-                                                <div
-                                                    className="rounded-xl border border-solid border-foreground/50 p-4 space-y-2 transition-all ease-in-out hover:shadow-xl hover:border-foreground hover:-translate-1.5"
-                                                >
-                                                    <div className='space-y-0.5'>
-                                                        <h1 className='font-semibold text-foreground'>
+                                <div className='cursor-pointer' key={index}>
+                                    <div
+                                        className="rounded-xl border border-solid border-foreground/50 p-4 space-y-2 transition-all ease-in-out hover:shadow-xl hover:border-foreground hover:-translate-1.5"
+                                    >
+                                        <div className='space-y-0.5'>
+                                            <TooltipProvider>
+                                                <Tooltip>
+                                                    <TooltipTrigger className='cursor-pointer'>
+                                                        <h1 className='font-semibold text-foreground' onClick={() => handleKnowledgeDetail(item.id)}>
                                                             {item.title}
                                                         </h1>
-                                                        <h2 className='text-muted-foreground text-xs truncate'>
-                                                            Đường dẫn: {' '}
-                                                            {item.url ? (
-                                                                <Link href={item.url} target='_blank' className='hover:text-blue-500 transition-all ease-in-out'>
-                                                                    {item.url}
-                                                                </Link>
-                                                            ) : (
-                                                                <span className="text-muted-foreground">Không có đường dẫn</span>
-                                                            )}
-                                                        </h2>
-                                                        <p className='text-muted-foreground text-xs'>
-                                                            Kiến thức thuộc danh mục:&nbsp;
-                                                            {
-                                                                categoryEnums.find((category) => category.id === item.category_id)?.name || "Không xác định"
-                                                            }
-                                                        </p>
-                                                        <p className='text-muted-foreground text-xs'>
-                                                            Trạng thái:&nbsp;
-                                                            <span className={`${item.is_active ? 'text-green-500' : 'text-red-500'}`}>
-                                                                {item.is_active ? 'Đang hoạt động' : 'Không hoạt động'}
-                                                            </span>
-                                                        </p>
-                                                    </div>
-                                                    <div className="flex justify-end items-center space-x-2">
-                                                        {item.is_active === 0 && (
-                                                            <Tooltip>
-                                                                <TooltipProvider>
-                                                                    <TooltipTrigger asChild>
-                                                                        <Button
-                                                                            size={'icon'}
-                                                                            variant={'outline'}
-                                                                            onClick={() => handleActiveKnowledge(item.id)}
-                                                                        >
-                                                                            <CheckIcon />
-                                                                        </Button>
-                                                                    </TooltipTrigger>
-                                                                    <TooltipContent>
-                                                                        <p>Kích hoạt kiến thức</p>
-                                                                    </TooltipContent>
-                                                                </TooltipProvider>
-                                                            </Tooltip>
-                                                        )}
-                                                        <TooltipProvider>
-                                                            <Tooltip>
-                                                                <TooltipTrigger asChild>
-                                                                    <Button
-                                                                        variant={'destructive'}
-                                                                        size={"icon"}
-                                                                        onClick={() => {
-                                                                            setSelectedId(item.id);
-                                                                            setOpenAlertDialog(true);
-                                                                        }}
-                                                                    >
-                                                                        <DeleteIcon />
-                                                                    </Button>
-                                                                </TooltipTrigger>
-                                                                <TooltipContent>
-                                                                    <p>Xóa</p>
-                                                                </TooltipContent>
-                                                            </Tooltip>
-                                                        </TooltipProvider>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p>Xem chi tiết kiến thức</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p>Xem chi tiết</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
+                                            <h2 className='text-muted-foreground text-xs truncate'>
+                                                Đường dẫn: {' '}
+                                                {item.url ? (
+                                                    <Link href={item.url} target='_blank' className='hover:text-blue-500 transition-all ease-in-out'>
+                                                        {item.url}
+                                                    </Link>
+                                                ) : (
+                                                    <span className="text-muted-foreground">Không có đường dẫn</span>
+                                                )}
+                                            </h2>
+                                            <p className='text-muted-foreground text-xs'>
+                                                Kiến thức thuộc danh mục:&nbsp;
+                                                {
+                                                    categoryEnums.find((category) => category.id === item.category_id)?.name || "Không xác định"
+                                                }
+                                            </p>
+                                            <p className='text-muted-foreground text-xs'>
+                                                Trạng thái:&nbsp;
+                                                <span className={`${item.is_active ? 'text-green-500' : 'text-red-500'}`}>
+                                                    {item.is_active ? 'Đang hoạt động' : 'Không hoạt động'}
+                                                </span>
+                                            </p>
+                                        </div>
+                                        <div className="flex justify-end items-center space-x-2">
+                                            {item.is_active === 0 && (
+                                                <Tooltip>
+                                                    <TooltipProvider>
+                                                        <TooltipTrigger asChild>
+                                                            <Button
+                                                                size={'icon'}
+                                                                variant={'outline'}
+                                                                onClick={() => handleActiveKnowledge(item.id)}
+                                                            >
+                                                                <CheckIcon />
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            <p>Kích hoạt kiến thức</p>
+                                                        </TooltipContent>
+                                                    </TooltipProvider>
+                                                </Tooltip>
+                                            )}
+                                            <TooltipProvider>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button
+                                                            variant={'destructive'}
+                                                            size={"icon"}
+                                                            onClick={() => {
+                                                                setSelectedId(item.id);
+                                                                setOpenAlertDialog(true);
+                                                            }}
+                                                        >
+                                                            <DeleteIcon />
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p>Xóa</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
+                                        </div>
+                                    </div>
+                                </div>
                             ))}
                         </div>
                         <Pagination className="mt-6">
