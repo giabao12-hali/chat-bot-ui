@@ -10,6 +10,7 @@ import {
     SidebarRail,
 } from "@/components/ui/sidebar"
 import { data } from "@/types/mock/navbar-items"
+import { NavSecondary } from "./nav-secondary"
 
 
 
@@ -18,7 +19,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <Sidebar collapsible="icon" {...props} variant="floating">
             <SidebarContent>
                 <NavMain items={data.navMain} projects={data.projects} />
-                {/* <NavSecondary className="mt-auto" /> */}
+                <NavSecondary className="mt-auto" items={data.navSecondary}/>
             </SidebarContent>
             <SidebarFooter>
                 <NavUser user={data.user} />

@@ -1,11 +1,26 @@
 import {
   House,
   Library,
+  LifeBuoy,
   MessagesSquare,
   Settings2,
+  TableOfContents,
 } from "lucide-react";
 
 export const navBarItems = ["Home", "About", "Services", "Contact"];
+
+export const itTeamMembers = [
+  {
+    name: "Nguyễn Minh Thư",
+    role: "Đội ngũ hệ thống",
+    phoneNumber: "0123456789",
+  },
+  {
+    name: "Nguyễn Hiển Gia Bảo",
+    role: "Đội ngũ giao diện",
+    phoneNumber: "0123456789",
+  },
+]
 
 export const data = {
   user: {
@@ -28,6 +43,18 @@ export const data = {
           url: "/resource",
         }
       ],
+    },
+  ],
+  navSecondary: [
+    {
+      title: "Hỗ trợ",
+      url: "/support",
+      icon: LifeBuoy,
+    },
+    {
+      title: "FAQs",
+      url: "/faqs",
+      icon: TableOfContents,
     },
   ],
   projects: [
