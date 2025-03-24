@@ -3,9 +3,7 @@
 'use client'
 
 import { getKnowledgeByKnowledgeResourceId } from '@/api/knowledge/knowledge.service';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { GetKnowledgeResourceDetailDtoModel } from '@/types/models/knowledge.model'
-import { Github } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react'
 
@@ -143,11 +141,6 @@ export default function KnowledgeDetails() {
                     </div>
                 )}
             </div>
-            {/* <Dock direction='middle'>
-                <DockIcon>
-                    <Github />
-                </DockIcon>
-            </Dock> */}
         </>
     )
 }
