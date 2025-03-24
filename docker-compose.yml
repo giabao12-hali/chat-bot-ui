@@ -1,0 +1,14 @@
+services:
+  web:
+    image: harbor.vietravel.com/chatbot-ui/chatbot-ui:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3100:3000"
+    environment:
+      - NODE_ENV=production
+    restart: always
+    command: npm start
+    env_file:
+      - .env
