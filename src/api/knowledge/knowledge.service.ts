@@ -27,7 +27,26 @@ export const deleteKnowledgeReourceId = async (id: number): Promise<number> => {
         return (await response).data
     } catch (error: any) {
         console.error(error);
-        throw new Error(error);
+
+        if (error.response) {
+            // Nếu có detail từ API
+            if (error.response.data && error.response.data.detail) {
+                const detailMessage = error.response.data.detail;
+                // Trích xuất chỉ phần message từ chuỗi detail
+                const messageMatch = detailMessage.match(/message='([^']+)'/);
+                if (messageMatch && messageMatch[1]) {
+                    throw new Error(messageMatch[1]);
+                }
+                // Nếu không tìm thấy định dạng message, trả về toàn bộ detail
+                throw new Error(detailMessage);
+            }
+            // Nếu là lỗi 500 (Internal Server Error)
+            if (error.response.status === 500) {
+                throw new Error("Hệ thống đang cập nhật, vui lòng thử lại sau");
+            }
+        }
+
+        throw new Error();
     }
 }
 

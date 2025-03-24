@@ -37,7 +37,7 @@ export default function CategoryPage() {
     const [openAlertDialog, setOpenAlertDialog] = useState<boolean>(false)
     const [openEditDialog, setOpenEditDialog] = useState<boolean>(false)
 
-    const [selectedCategory, setSelectedCategory] = useState<CategoryBaseModel | null >(null);
+    const [selectedCategory, setSelectedCategory] = useState<CategoryBaseModel | null>(null);
     const [selectedId, setSelectedId] = useState<number | null>(null);
 
     useEffect(() => {
@@ -66,10 +66,12 @@ export default function CategoryPage() {
             {
                 loading: "Đang xóa danh mục...",
                 success: "Xóa danh mục thành công",
-                error: (error: any) => error.message || "Xóa thất bại, vui lòng thử lại sau"
+                error: (error) => error.message
             }
-        )
-    }
+        );
+    };
+
+
 
     const handleEditCategory = async (id: number) => {
         try {
@@ -223,7 +225,7 @@ export default function CategoryPage() {
                         </DialogDescription>
                     </DialogHeader>
                     <div>
-                        <FormEditCategory category={categories} selectedCategory={selectedCategory} onClose={() => setOpenEditDialog(false)}/>
+                        <FormEditCategory category={categories} selectedCategory={selectedCategory} onClose={() => setOpenEditDialog(false)} />
                     </div>
                 </DialogContent>
             </Dialog>
