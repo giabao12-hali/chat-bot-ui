@@ -3,7 +3,11 @@
 'use client'
 
 import { getKnowledgeByKnowledgeResourceId } from '@/api/knowledge/knowledge.service';
+import { ArrowLeftIcon } from '@/components/ui/arrow-left';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { GetKnowledgeResourceDetailDtoModel } from '@/types/models/knowledge.model'
+import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react'
 
@@ -101,7 +105,6 @@ export default function KnowledgeDetails() {
         return <p className="break-words">{content}</p>;
     };
 
-
     return (
         <>
             <div className="flex flex-col gap-4 p-4">
@@ -121,8 +124,30 @@ export default function KnowledgeDetails() {
                     </div>
                 ) : (
                     <div className='w-full space-y-4 relative'>
-
-                        <h1 className='font-semibold text-center text-lg md:text-2xl'>Danh sách chi tiết kiến thức</h1>
+                        <div className="flex items-center w-full relative">
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            size={'icon'}
+                                            variant={'secondary'}
+                                            className="absolute left-0"
+                                            asChild
+                                        >
+                                            <Link href={'/knowledge'}>
+                                                <ArrowLeftIcon />
+                                            </Link>
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Quay về</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                            <div className="flex-grow text-center">
+                                <h1 className='font-semibold text-lg md:text-2xl'>Danh sách chi tiết kiến thức</h1>
+                            </div>
+                        </div>
                         {knowledgeDetails.map((knowledge, index) => (
                             <div className="border rounded-lg p-4 shadow-sm" key={index}>
                                 <h2 className="text-lg font-medium mb-2">{index + 1}</h2>

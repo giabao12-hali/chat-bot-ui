@@ -39,7 +39,7 @@ export default function HomePage() {
         <div className="flex justify-center items-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant={"outline"} className="w-1/4 flex justify-between items-center text-muted-foreground">
+              <Button variant={"outline"} className="md:w-1/4 sm:w-full flex justify-between items-center text-muted-foreground">
                 Tìm kiếm
                 <Search />
               </Button>

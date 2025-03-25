@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { DeleteIcon } from '@/components/ui/delete'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { KnowledgeBaseModel } from '@/types/models/knowledge.model'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -20,7 +20,6 @@ import {
 import toast from 'react-hot-toast'
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import Link from 'next/link'
-import { categoryEnums } from '@/types/enums/category.enums'
 import { Plus } from 'lucide-react'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import FormKnowledge from './components/form_knowledge'
@@ -45,8 +44,6 @@ import { getResources } from '@/api/resource/resource.service'
 import { useRouter } from 'next/navigation'
 
 
-
-
 export default function KnowledgePage() {
     const isDesktop = useMediaQuery("(min-width: 768px)")
 
@@ -66,10 +63,17 @@ export default function KnowledgePage() {
     const [openAlertDialog, setOpenAlertDialog] = useState<boolean>(false)
     const [selectedId, setSelectedId] = useState<number | null>(null);
 
-    const [currentPage, setCurrentPage] = useState(1);
+    const [currentPage, setCurrentPage] = useState(() => {
+        const savedPage = localStorage.getItem('knowledgeCurrentPage')
+        return savedPage ? parseInt(savedPage, 10) : 1
+    });
     const itemsPerPage = 9;
 
     const router = useRouter();
+
+    useEffect(() => {
+        localStorage.setItem('knowledgeCurrentPage', currentPage.toString())
+    }, [currentPage])
 
     useEffect(() => {
         const getDatas = async () => {
@@ -131,6 +135,8 @@ export default function KnowledgePage() {
     const handleSearch = async () => {
         try {
             setLoading(true);
+
+            setCurrentPage(1);
             // ✅ Chỉ gửi params nếu có giá trị hợp lệ
             const response = await getKnowledgeResource(
                 searchParams.resource_id ? parseInt(searchParams.resource_id) : undefined,
@@ -149,19 +155,32 @@ export default function KnowledgePage() {
     };
 
     const handleKnowledgeDetail = async (id: number) => {
+        localStorage.setItem('knowledgeCurrentPage', currentPage.toString())
         router.push(`/knowledge/${id}`)
     }
 
-
+    useEffect(() => {
+        const savedPage = localStorage.getItem('knowledgeCurrentPage')
+        if (savedPage) {
+            setCurrentPage(parseInt(savedPage, 10))
+        }
+    }, [])
 
     //#region Phân trang
+    const sortedKnowledge = useMemo(() =>
+        knowledge.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()),
+        [knowledge]
+    );
     // ✅ Tính toán số trang
-    const totalPages = Math.ceil(knowledge.length / itemsPerPage);
+    const totalPages = Math.ceil(sortedKnowledge.length / itemsPerPage);
 
     // ✅ Lấy dữ liệu của trang hiện tại
-    const paginatedData = knowledge.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
+    const paginatedData = useMemo(() =>
+        sortedKnowledge.slice(
+            (currentPage - 1) * itemsPerPage,
+            currentPage * itemsPerPage
+        ),
+        [sortedKnowledge, currentPage, itemsPerPage]
     );
     //#endregion
 
@@ -296,89 +315,88 @@ export default function KnowledgePage() {
                             </div>
                         </section>
                         <div className="grid auto-rows-min gap-4 md:grid-cols-3 grid-cols-1">
-                            {paginatedData.map((item, index) => (
-                                <div className='cursor-pointer' key={index}>
-                                    <div
-                                        className="rounded-xl border border-solid border-foreground/50 p-4 space-y-2 transition-all ease-in-out hover:shadow-xl hover:border-foreground hover:-translate-1.5"
-                                    >
-                                        <div className='space-y-0.5'>
-                                            <TooltipProvider>
-                                                <Tooltip>
-                                                    <TooltipTrigger className='cursor-pointer'>
-                                                        <h1 className='font-semibold text-foreground' onClick={() => handleKnowledgeDetail(item.id)}>
-                                                            {item.title}
-                                                        </h1>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>
-                                                        <p>Xem chi tiết</p>
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </TooltipProvider>
-                                            <h2 className='text-muted-foreground text-xs truncate'>
-                                                Đường dẫn: {' '}
-                                                {item.url ? (
-                                                    <Link href={item.url} target='_blank' className='hover:text-blue-500 transition-all ease-in-out'>
-                                                        {item.url}
-                                                    </Link>
-                                                ) : (
-                                                    <span className="text-muted-foreground">Không có đường dẫn</span>
+                            {paginatedData
+                                .map((item, index) => (
+                                    <div className='cursor-pointer' key={index}>
+                                        <div
+                                            className="rounded-xl border border-solid border-foreground/50 p-4 space-y-2 transition-all ease-in-out hover:shadow-xl hover:border-foreground hover:-translate-1.5"
+                                        >
+                                            <div className='space-y-0.5'>
+                                                <TooltipProvider>
+                                                    <Tooltip>
+                                                        <TooltipTrigger className='cursor-pointer'>
+                                                            <h1 className='font-semibold text-foreground text-left' onClick={() => handleKnowledgeDetail(item.id)}>
+                                                                {item.title}
+                                                            </h1>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            <p>Xem chi tiết</p>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </TooltipProvider>
+                                                <h2 className='text-muted-foreground text-xs truncate'>
+                                                    Đường dẫn: {' '}
+                                                    {item.url ? (
+                                                        <Link href={item.url} target='_blank' className='hover:text-blue-500 transition-all ease-in-out'>
+                                                            {item.url}
+                                                        </Link>
+                                                    ) : (
+                                                        <span className="text-muted-foreground">Không có đường dẫn</span>
+                                                    )}
+                                                </h2>
+                                                <p className='text-muted-foreground text-xs'>
+                                                    Kiến thức thuộc danh mục:&nbsp;
+                                                    {categories.find((category) => category.id === item.category_id)?.name || "Không xác định"}
+                                                </p>
+                                                <p className='text-muted-foreground text-xs'>
+                                                    Trạng thái:&nbsp;
+                                                    <span className={`${item.is_active ? 'text-green-500' : 'text-red-500'}`}>
+                                                        {item.is_active ? 'Đang hoạt động' : 'Không hoạt động'}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                            <div className="flex justify-end items-center space-x-2">
+                                                {item.is_active === 0 && (
+                                                    <Tooltip>
+                                                        <TooltipProvider>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    size={'icon'}
+                                                                    variant={'outline'}
+                                                                    onClick={() => handleActiveKnowledge(item.id)}
+                                                                >
+                                                                    <CheckIcon />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                <p>Kích hoạt kiến thức</p>
+                                                            </TooltipContent>
+                                                        </TooltipProvider>
+                                                    </Tooltip>
                                                 )}
-                                            </h2>
-                                            <p className='text-muted-foreground text-xs'>
-                                                Kiến thức thuộc danh mục:&nbsp;
-                                                {
-                                                    categoryEnums.find((category) => category.id === item.category_id)?.name || "Không xác định"
-                                                }
-                                            </p>
-                                            <p className='text-muted-foreground text-xs'>
-                                                Trạng thái:&nbsp;
-                                                <span className={`${item.is_active ? 'text-green-500' : 'text-red-500'}`}>
-                                                    {item.is_active ? 'Đang hoạt động' : 'Không hoạt động'}
-                                                </span>
-                                            </p>
-                                        </div>
-                                        <div className="flex justify-end items-center space-x-2">
-                                            {item.is_active === 0 && (
-                                                <Tooltip>
-                                                    <TooltipProvider>
+                                                <TooltipProvider>
+                                                    <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Button
-                                                                size={'icon'}
-                                                                variant={'outline'}
-                                                                onClick={() => handleActiveKnowledge(item.id)}
+                                                                variant={'destructive'}
+                                                                size={"icon"}
+                                                                onClick={() => {
+                                                                    setSelectedId(item.id);
+                                                                    setOpenAlertDialog(true);
+                                                                }}
                                                             >
-                                                                <CheckIcon />
+                                                                <DeleteIcon />
                                                             </Button>
                                                         </TooltipTrigger>
                                                         <TooltipContent>
-                                                            <p>Kích hoạt kiến thức</p>
+                                                            <p>Xóa</p>
                                                         </TooltipContent>
-                                                    </TooltipProvider>
-                                                </Tooltip>
-                                            )}
-                                            <TooltipProvider>
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <Button
-                                                            variant={'destructive'}
-                                                            size={"icon"}
-                                                            onClick={() => {
-                                                                setSelectedId(item.id);
-                                                                setOpenAlertDialog(true);
-                                                            }}
-                                                        >
-                                                            <DeleteIcon />
-                                                        </Button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>
-                                                        <p>Xóa</p>
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </TooltipProvider>
+                                                    </Tooltip>
+                                                </TooltipProvider>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))}
                         </div>
                         <Pagination className="mt-6">
                             <PaginationContent>

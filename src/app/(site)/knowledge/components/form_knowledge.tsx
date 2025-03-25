@@ -29,6 +29,7 @@ import toast from 'react-hot-toast'
 import { CreateKnowledgeDtoModel, CreateKnowledgeUrlDtoModel } from '../../../../types/models/knowledge.model';
 import { insertByText, postByUrl } from '@/api/knowledge/knowledge.service'
 import { getRememberMe } from '@/utils/cookie'
+import { AutosizeTextarea } from '@/components/ui/autosize-textarea'
 
 const formSchema = z.object({
     title: z.string().min(2, {
@@ -191,7 +192,8 @@ export default function FormKnowledge() {
                                                     Nội dung <span className='text-destructive-foreground'>(*)</span>
                                                 </FormLabel>
                                                 <FormControl>
-                                                    <Input
+                                                    <AutosizeTextarea
+                                                        maxHeight={200}
                                                         placeholder='Nhập nội dung'
                                                         {...field}
                                                     />
