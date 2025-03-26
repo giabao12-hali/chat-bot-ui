@@ -35,7 +35,7 @@ export const data = {
       icon: Settings2,
       items: [
         {
-          title: "Danh mục",
+          title: "Loại kiến thức",
           url: "/category",
         },
         {

@@ -43,8 +43,21 @@ import { getCategories } from '@/api/category/category.service'
 import { getResources } from '@/api/resource/resource.service'
 import { useRouter } from 'next/navigation'
 
+import noDataAnimation from '@/components/presentation/animations/no-data.animation.json'
+import dynamic from 'next/dynamic'
+const Lottie = dynamic(() => import("react-lottie"), { ssr: false });
+
 
 export default function KnowledgePage() {
+    const defaultOptions = {
+        loop: true,
+        autoplay: true,
+        animationData: noDataAnimation,
+        rendererSettings: {
+            preserveAspectRatio: "xMidYMid slice"
+        }
+    };
+
     const isDesktop = useMediaQuery("(min-width: 768px)")
 
     const [loading, setLoading] = useState<boolean>(true)
@@ -64,15 +77,20 @@ export default function KnowledgePage() {
     const [selectedId, setSelectedId] = useState<number | null>(null);
 
     const [currentPage, setCurrentPage] = useState(() => {
-        const savedPage = localStorage.getItem('knowledgeCurrentPage')
-        return savedPage ? parseInt(savedPage, 10) : 1
+        if (typeof window !== 'undefined') {
+            const savedPage = sessionStorage.getItem('knowledgeCurrentPage')
+            return savedPage ? parseInt(savedPage, 10) : 1
+        }
+        return 1;
     });
     const itemsPerPage = 9;
 
     const router = useRouter();
 
     useEffect(() => {
-        localStorage.setItem('knowledgeCurrentPage', currentPage.toString())
+        if (typeof window !== 'undefined') {
+            sessionStorage.setItem('knowledgeCurrentPage', currentPage.toString())
+        }
     }, [currentPage])
 
     useEffect(() => {
@@ -155,14 +173,16 @@ export default function KnowledgePage() {
     };
 
     const handleKnowledgeDetail = async (id: number) => {
-        localStorage.setItem('knowledgeCurrentPage', currentPage.toString())
+        sessionStorage.setItem('knowledgeCurrentPage', currentPage.toString())
         router.push(`/knowledge/${id}`)
     }
 
     useEffect(() => {
-        const savedPage = localStorage.getItem('knowledgeCurrentPage')
-        if (savedPage) {
-            setCurrentPage(parseInt(savedPage, 10))
+        if (typeof window !== 'undefined') {
+            const savedPage = sessionStorage.getItem('knowledgeCurrentPage')
+            if (savedPage) {
+                setCurrentPage(parseInt(savedPage, 10))
+            }
         }
     }, [])
 
@@ -255,6 +275,7 @@ export default function KnowledgePage() {
                         <section className='space-y-6'>
                             <div className='flex items-center justify-center gap-4 flex-col md:flex-row'>
                                 <Select
+                                    value={searchParams.categories_id?.toString()}
                                     onValueChange={(value) =>
                                         setSearchParams((prev: any) => ({
                                             ...prev,
@@ -263,7 +284,7 @@ export default function KnowledgePage() {
                                     }
                                 >
                                     <SelectTrigger className="w-52">
-                                        <SelectValue placeholder="Chọn danh mục" />
+                                        <SelectValue placeholder="Chọn loại kiến thức" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectGroup>
@@ -276,7 +297,12 @@ export default function KnowledgePage() {
                                         </SelectGroup>
                                     </SelectContent>
                                 </Select>
-                                <Select onValueChange={(value) => setSearchParams((prev: any) => ({ ...prev, resource_id: value }))}>
+                                <Select
+                                    value={searchParams.resource_id?.toString()}
+                                    onValueChange={(value) =>
+                                        setSearchParams((prev: any) => ({ ...prev, resource_id: value }))
+                                    }
+                                >
                                     <SelectTrigger className="w-52">
                                         <SelectValue placeholder="Chọn nguồn kiến thức" />
                                     </SelectTrigger>
@@ -304,6 +330,19 @@ export default function KnowledgePage() {
                                         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                                     >
                                         Kích hoạt
+                                    </label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox
+                                        id="active"
+                                    // checked={searchParams.is_active}
+                                    // onCheckedChange={(checked) => setSearchParams((prev: any) => ({ ...prev, is_active: checked === true }))}
+                                    />
+                                    <label
+                                        htmlFor="active"
+                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                    >
+                                        Chưa kích hoạt
                                     </label>
                                 </div>
                             </div>
@@ -398,95 +437,111 @@ export default function KnowledgePage() {
                                     </div>
                                 ))}
                         </div>
-                        <Pagination className="mt-6">
-                            <PaginationContent>
-                                <PaginationItem>
-                                    <PaginationPrevious
-                                        href="#"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            setCurrentPage((prev) => Math.max(prev - 1, 1));
-                                        }}
-                                        style={{ pointerEvents: currentPage === 1 ? 'none' : 'auto', opacity: currentPage === 1 ? 0.5 : 1 }}
-                                    />
-                                </PaginationItem>
-
-                                <PaginationItem>
-                                    <PaginationLink
-                                        href="#"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            setCurrentPage(1);
-                                        }}
-                                        isActive={currentPage === 1}
-                                    >
-                                        1
-                                    </PaginationLink>
-                                </PaginationItem>
-
-                                {currentPage > 3 && (
+                        {paginatedData.length === 0 && (
+                            <>
+                                <Lottie
+                                    options={defaultOptions}
+                                    width={600}
+                                    height={400}
+                                />
+                                <div className='text-center'>
+                                    <h2 className='text-lg font-semibold'>Dữ liệu bạn tìm kiếm hiện tại không tồn tại</h2>
+                                    <p className='text-sm text-muted-foreground'>
+                                        Thay vào đó bạn hãy đứng dậy uống miếng, nước ăn miếng bánh thì sao?
+                                    </p>
+                                </div>
+                            </>
+                        )}
+                        {paginatedData.length > 0 && (
+                            <Pagination className="mt-6">
+                                <PaginationContent>
                                     <PaginationItem>
-                                        <PaginationEllipsis />
+                                        <PaginationPrevious
+                                            href="#"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setCurrentPage((prev) => Math.max(prev - 1, 1));
+                                            }}
+                                            style={{ pointerEvents: currentPage === 1 ? 'none' : 'auto', opacity: currentPage === 1 ? 0.5 : 1 }}
+                                        />
                                     </PaginationItem>
-                                )}
 
-                                {Array.from({ length: totalPages }, (_, index) => index + 1)
-                                    .filter(
-                                        (page) =>
-                                            page !== 1 &&
-                                            page !== totalPages &&
-                                            page >= currentPage - 1 &&
-                                            page <= currentPage + 1
-                                    )
-                                    .map((page) => (
-                                        <PaginationItem key={page}>
-                                            <PaginationLink
-                                                href="#"
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    setCurrentPage(page);
-                                                }}
-                                                isActive={currentPage === page}
-                                            >
-                                                {page}
-                                            </PaginationLink>
-                                        </PaginationItem>
-                                    ))}
-
-                                {currentPage < totalPages - 2 && (
-                                    <PaginationItem>
-                                        <PaginationEllipsis />
-                                    </PaginationItem>
-                                )}
-
-                                {totalPages > 1 && (
                                     <PaginationItem>
                                         <PaginationLink
                                             href="#"
                                             onClick={(e) => {
                                                 e.preventDefault();
-                                                setCurrentPage(totalPages);
+                                                setCurrentPage(1);
                                             }}
-                                            isActive={currentPage === totalPages}
+                                            isActive={currentPage === 1}
                                         >
-                                            {totalPages}
+                                            1
                                         </PaginationLink>
                                     </PaginationItem>
-                                )}
 
-                                <PaginationItem>
-                                    <PaginationNext
-                                        href="#"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            setCurrentPage((prev) => Math.min(prev + 1, totalPages));
-                                        }}
-                                        style={{ pointerEvents: currentPage === totalPages ? 'none' : 'auto', opacity: currentPage === totalPages ? 0.5 : 1 }}
-                                    />
-                                </PaginationItem>
-                            </PaginationContent>
-                        </Pagination>
+                                    {currentPage > 3 && (
+                                        <PaginationItem>
+                                            <PaginationEllipsis />
+                                        </PaginationItem>
+                                    )}
 
+                                    {Array.from({ length: totalPages }, (_, index) => index + 1)
+                                        .filter(
+                                            (page) =>
+                                                page !== 1 &&
+                                                page !== totalPages &&
+                                                page >= currentPage - 1 &&
+                                                page <= currentPage + 1
+                                        )
+                                        .map((page) => (
+                                            <PaginationItem key={page}>
+                                                <PaginationLink
+                                                    href="#"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        setCurrentPage(page);
+                                                    }}
+                                                    isActive={currentPage === page}
+                                                >
+                                                    {page}
+                                                </PaginationLink>
+                                            </PaginationItem>
+                                        ))}
+
+                                    {currentPage < totalPages - 2 && (
+                                        <PaginationItem>
+                                            <PaginationEllipsis />
+                                        </PaginationItem>
+                                    )}
+
+                                    {totalPages > 1 && (
+                                        <PaginationItem>
+                                            <PaginationLink
+                                                href="#"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    setCurrentPage(totalPages);
+                                                }}
+                                                isActive={currentPage === totalPages}
+                                            >
+                                                {totalPages}
+                                            </PaginationLink>
+                                        </PaginationItem>
+                                    )}
+
+                                    <PaginationItem>
+                                        <PaginationNext
+                                            href="#"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+                                            }}
+                                            style={{ pointerEvents: currentPage === totalPages ? 'none' : 'auto', opacity: currentPage === totalPages ? 0.5 : 1 }}
+                                        />
+                                    </PaginationItem>
+                                </PaginationContent>
+                            </Pagination>
+                        )}
                     </>
                 )}
             </div>
