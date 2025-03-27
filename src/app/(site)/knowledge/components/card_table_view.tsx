@@ -270,7 +270,7 @@ const KnowledgeViewSwitcher: React.FC<KnowledgeViewSwitcherProps> = ({
 
     return (
         <div className="space-y-4">
-            <div className="mb-4">
+            <div className="mb-4 space-y-1">
                 <Select value={viewMode} onValueChange={setViewMode}>
                     <SelectTrigger className="w-[180px]">
                         <SelectValue placeholder="Hiển thị" />

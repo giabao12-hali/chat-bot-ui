@@ -108,8 +108,6 @@ export const getKnowledgeResource = async(resource_id?: number, category_id?: nu
         if (category_id && category_id > 0) params.category_id = category_id;
         if (is_active !== undefined) params.is_active = is_active;
 
-        console.log("📤 Gửi request với params:", params);
-
         const response = await serverApi.get<GetKnowledgeResourceDtoModel[]>(
             `/api/v1/get-knowledge-resource`,
             { params }

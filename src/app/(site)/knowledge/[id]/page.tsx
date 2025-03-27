@@ -7,32 +7,36 @@ import { ArrowLeftIcon } from '@/components/ui/arrow-left';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { GetKnowledgeResourceDetailDtoModel } from '@/types/models/knowledge.model'
-import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import React, { useEffect, useState } from 'react'
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 export default function KnowledgeDetails() {
-    const { id } = useParams();
+    const { id: rawId } = useParams();
+    const searchParams = useSearchParams();
+    const router = useRouter();
 
-    const [knowledgeDetails, setKnowledgeDetails] = React.useState<GetKnowledgeResourceDetailDtoModel[]>([]);
+    const id = useMemo(() => (rawId ? Number(rawId) : null), [rawId]);
+
+    const [knowledgeDetails, setKnowledgeDetails] = useState<GetKnowledgeResourceDetailDtoModel[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
-    const [error, setError] = useState<string>('');
+    const [error, setError] = useState<string>("");
+
+    const fetchKnowledgeDetails = useCallback(async () => {
+        if (!id) return;
+        try {
+            setLoading(true);
+            const data = await getKnowledgeByKnowledgeResourceId(Number(id));
+            setKnowledgeDetails(data);
+        } catch (error) {
+            setError("Không thể tải chi tiết kiến thức");
+        } finally {
+            setLoading(false);
+        }
+    }, [id]);
 
     useEffect(() => {
-        const fetchKnowledgeDetails = async () => {
-            try {
-                setLoading(true);
-                const data = await getKnowledgeByKnowledgeResourceId(Number(id));
-                setKnowledgeDetails(data);
-            } catch (error) {
-                console.error("Error fetching knowledge details", error);
-                setError("Error fetching knowledge details");
-            } finally {
-                setLoading(false);
-            }
-        }
         fetchKnowledgeDetails();
-    }, [id]);
+    }, [fetchKnowledgeDetails])
 
     const parseJsonContent = (jsonString: string) => {
         try {
@@ -42,33 +46,24 @@ export default function KnowledgeDetails() {
         }
     };
 
-    // Function to parse the special metadata format
-    // It handles the Python-like dictionary format with single quotes
     const parseMetadata = (metadataString: string) => {
         try {
-            // Replace single quotes with double quotes to make it valid JSON
-            // But first handle the nested single quotes in values
             const jsonReadyString = metadataString
                 .replace(/'/g, '"')
-                // Fix double quotes around keys and values that might have been created
                 .replace(/"([^"]+)":/g, '"$1":')
-                // Fix any escaped quotes that might need attention
                 .replace(/\\"/g, '\\"');
 
             return JSON.parse(jsonReadyString);
         } catch (error) {
-            // If parsing fails, try to create a more readable format
             try {
-                // Create a simple object by extracting key-value pairs
                 const result: Record<string, string> = {};
                 const keyValuePairs = metadataString
-                    .replace(/^{|}$/g, '') // Remove outer braces
+                    .replace(/^{|}$/g, '')
                     .split(', ');
 
                 keyValuePairs.forEach(pair => {
                     const [key, value] = pair.split(': ');
                     if (key && value) {
-                        // Remove quotes from key and value
                         const cleanKey = key.replace(/^'|'$/g, '');
                         const cleanValue = value.replace(/^'|'$/g, '');
                         result[cleanKey] = cleanValue;
@@ -77,13 +72,11 @@ export default function KnowledgeDetails() {
 
                 return result;
             } catch {
-                // If all else fails, return the original string
                 return metadataString;
             }
         }
     };
 
-    // Function to render content in a readable format
     const renderContent = (content: any, isMetadata = false) => {
         if (typeof content === 'object' && content !== null) {
             return (
@@ -92,7 +85,6 @@ export default function KnowledgeDetails() {
                 </pre>
             );
         } else if (isMetadata && typeof content === 'string') {
-            // For metadata that couldn't be parsed as JSON
             const parsed = parseMetadata(content);
             if (typeof parsed === 'object') {
                 return (
@@ -132,11 +124,11 @@ export default function KnowledgeDetails() {
                                             size={'icon'}
                                             variant={'secondary'}
                                             className="absolute left-0"
-                                            asChild
+                                            onClick={() => {
+                                                router.push(`/knowledge?${searchParams.toString()}`);
+                                            }}
                                         >
-                                            <Link href={'/knowledge'}>
-                                                <ArrowLeftIcon />
-                                            </Link>
+                                            <ArrowLeftIcon />
                                         </Button>
                                     </TooltipTrigger>
                                     <TooltipContent>

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
-import { activeKnowledge, deleteKnowledgeReourceId, getKnowledgeResource, getKnowledgeResourceAll } from '@/api/knowledge/knowledge.service'
+import { activeKnowledge, deleteKnowledgeReourceId, getKnowledgeResource } from '@/api/knowledge/knowledge.service'
 import { Button } from '@/components/ui/button'
 import { KnowledgeBaseModel } from '@/types/models/knowledge.model'
 import React, { useEffect, useMemo, useState } from 'react'
@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import toast from 'react-hot-toast'
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
-import { Plus } from 'lucide-react'
+import { BadgeMinus, Plus } from 'lucide-react'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import FormKnowledge from './components/form_knowledge'
 import { useMediaQuery } from '@/hooks/use-media-query'
@@ -31,12 +31,12 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { SearchIcon } from '@/components/ui/search'
+// import { SearchIcon } from '@/components/ui/search'
 import { CategoryBaseModel } from '@/types/models/category.model'
 import { ResourceModel } from '@/types/models/resource.model'
 import { getCategories } from '@/api/category/category.service'
 import { getResources } from '@/api/resource/resource.service'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 import noDataAnimation from '@/components/presentation/animations/no-data.animation.json'
 import dynamic from 'next/dynamic'
@@ -63,53 +63,65 @@ export default function KnowledgePage() {
     const [categories, setCategories] = useState<CategoryBaseModel[]>([])
     const [resources, setResources] = useState<ResourceModel[]>([]);
 
-    const [searchParams, setSearchParams] = useState({
-        resource_id: "",
-        categories_id: "",
-        is_active: false
-    })
 
     const [openAlertDialog, setOpenAlertDialog] = useState<boolean>(false)
     const [selectedId, setSelectedId] = useState<number | null>(null);
 
+
     const [currentPage, setCurrentPage] = useState(() => {
-        if (typeof window !== 'undefined') {
-            const savedPage = sessionStorage.getItem('knowledgeCurrentPage')
-            return savedPage ? parseInt(savedPage, 10) : 1
+        if (typeof window !== "undefined") {
+            return parseInt(sessionStorage.getItem("knowledgeCurrentPage") || "1", 10);
         }
         return 1;
     });
+
     const itemsPerPage = 9;
 
     const router = useRouter();
+    const searchParams = useSearchParams();
+
+    const [searchParamsState, setSearchParamsState] = useState({
+        resource_id: searchParams.get("resource_id") || "",
+        categories_id: searchParams.get("categories_id") || "",
+        is_active: searchParams.get("is_active") === "true" ? true
+            : searchParams.get("is_active") === "false" ? false
+                : null // Dùng null thay vì ""
+    });
+
 
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            sessionStorage.setItem('knowledgeCurrentPage', currentPage.toString())
+        if (typeof window !== "undefined") {
+            sessionStorage.setItem("knowledgeCurrentPage", currentPage.toString());
+            sessionStorage.setItem("knowledgeSearchParams", JSON.stringify(searchParamsState));
         }
-    }, [currentPage])
+    }, [currentPage, searchParamsState]);
+
 
     useEffect(() => {
-        const getDatas = async () => {
+        const fetchData = async () => {
             try {
-                setLoading(true)
+                setLoading(true);
                 const [knowledgeRes, categoryRes, resourceRes] = await Promise.all([
-                    getKnowledgeResourceAll(),
+                    getKnowledgeResource(
+                        searchParamsState.resource_id ? parseInt(searchParamsState.resource_id) : undefined,
+                        searchParamsState.categories_id ? parseInt(searchParamsState.categories_id) : undefined,
+                        searchParamsState.is_active !== null ? searchParamsState.is_active : undefined
+                    ),
                     getCategories(),
-                    getResources(),
+                    getResources()
                 ]);
-
                 setKnowledge(knowledgeRes);
                 setCategories(categoryRes);
                 setResources(resourceRes);
             } catch (error: any) {
-                setError(error.message || 'Đã có lỗi xảy ra, vui lòng thử lại sau')
+                setError(error.message || "Đã có lỗi xảy ra, vui lòng thử lại sau");
             } finally {
-                setLoading(false)
+                setLoading(false);
             }
-        }
-        getDatas()
-    }, [])
+        };
+        fetchData();
+    }, [searchParamsState]);
+
 
     const handleDeleteKnowledge = async () => {
         if (selectedId === null) return;
@@ -146,41 +158,10 @@ export default function KnowledgePage() {
         );
     };
 
-    const handleSearch = async () => {
-        try {
-            setLoading(true);
-
-            setCurrentPage(1);
-            // ✅ Chỉ gửi params nếu có giá trị hợp lệ
-            const response = await getKnowledgeResource(
-                searchParams.resource_id ? parseInt(searchParams.resource_id) : undefined,
-                searchParams.categories_id ? parseInt(searchParams.categories_id) : undefined,
-                searchParams.is_active ? true : undefined
-            );
-
-            console.log("🔍 Kết quả API:", response);
-            setKnowledge(response.length > 0 ? response : []);
-        } catch (error: any) {
-            console.error("❌ Lỗi khi gọi API:", error);
-            setError(error.message || "Lỗi khi tìm kiếm!");
-        } finally {
-            setLoading(false);
-        }
+    const handleKnowledgeDetail = (id: number) => {
+        router.push(`/knowledge/${id}?${searchParams.toString()}`);
     };
 
-    const handleKnowledgeDetail = async (id: number) => {
-        sessionStorage.setItem('knowledgeCurrentPage', currentPage.toString())
-        router.push(`/knowledge/${id}`)
-    }
-
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const savedPage = sessionStorage.getItem('knowledgeCurrentPage')
-            if (savedPage) {
-                setCurrentPage(parseInt(savedPage, 10))
-            }
-        }
-    }, [])
 
     //#region Phân trang
     const sortedKnowledge = useMemo(() =>
@@ -271,13 +252,17 @@ export default function KnowledgePage() {
                         <section className='space-y-6'>
                             <div className='flex items-center justify-center gap-4 flex-col md:flex-row'>
                                 <Select
-                                    value={searchParams.categories_id?.toString()}
-                                    onValueChange={(value) =>
-                                        setSearchParams((prev: any) => ({
+                                    value={searchParamsState.categories_id.toString()}
+                                    onValueChange={(value) => {
+                                        setSearchParamsState((prev) => ({
                                             ...prev,
                                             categories_id: value
-                                        }))
-                                    }
+                                        }));
+
+                                        const updatedParams = new URLSearchParams(searchParams);
+                                        updatedParams.set("categories_id", value);
+                                        router.push(`/knowledge?${updatedParams.toString()}`);
+                                    }}
                                 >
                                     <SelectTrigger className="w-52">
                                         <SelectValue placeholder="Chọn loại kiến thức" />
@@ -294,10 +279,17 @@ export default function KnowledgePage() {
                                     </SelectContent>
                                 </Select>
                                 <Select
-                                    value={searchParams.resource_id?.toString()}
-                                    onValueChange={(value) =>
-                                        setSearchParams((prev: any) => ({ ...prev, resource_id: value }))
-                                    }
+                                    value={searchParamsState.resource_id.toString()}
+                                    onValueChange={(value) => {
+                                        setSearchParamsState((prev) => ({
+                                            ...prev,
+                                            resource_id: value
+                                        }));
+
+                                        const updatedParams = new URLSearchParams(searchParams);
+                                        updatedParams.set("resource_id", value);
+                                        router.push(`/knowledge?${updatedParams.toString()}`);
+                                    }}
                                 >
                                     <SelectTrigger className="w-52">
                                         <SelectValue placeholder="Chọn nguồn kiến thức" />
@@ -315,25 +307,49 @@ export default function KnowledgePage() {
                                         </SelectGroup>
                                     </SelectContent>
                                 </Select>
-                                <Select>
+                                <Select
+                                    value={searchParamsState.is_active !== null ? searchParamsState.is_active.toString() : "null"} // Không truyền ""
+                                    onValueChange={(value) => {
+                                        setSearchParamsState((prev) => ({
+                                            ...prev,
+                                            is_active: value === "true" ? true : value === "false" ? false : null
+                                        }));
+
+                                        const updatedParams = new URLSearchParams(searchParams);
+                                        if (value === "true" || value === "false") {
+                                            updatedParams.set("is_active", value);
+                                        } else {
+                                            updatedParams.delete("is_active"); // Xóa nếu chọn "--Tất cả--"
+                                        }
+                                        router.push(`/knowledge?${updatedParams.toString()}`);
+                                    }}
+                                >
                                     <SelectTrigger className="w-52">
                                         <SelectValue placeholder="Kích hoạt" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectGroup>
-                                            <SelectItem value='0'>
-                                                --Tất cả--
-                                            </SelectItem>
-                                            <SelectItem value="active">Kích hoạt</SelectItem>
-                                            <SelectItem value="notActive">Chưa kích hoạt</SelectItem>
+                                            <SelectItem value="null">--Tất cả--</SelectItem>
+                                            <SelectItem value="true">Kích hoạt</SelectItem>
+                                            <SelectItem value="false">Chưa kích hoạt</SelectItem>
                                         </SelectGroup>
                                     </SelectContent>
                                 </Select>
-                            </div>
-                            <div className="flex justify-center items-center">
-                                <Button size={'sm'} variant={'outline'} className='cursor-pointer' onClick={handleSearch}>
-                                    <SearchIcon className='hover:bg-transparent' />
-                                    Tìm kiếm
+                                <Button
+                                    size={"sm"}
+                                    variant={'outline'}
+                                    onClick={() => {
+                                        setSearchParamsState({
+                                            resource_id: "",
+                                            categories_id: "",
+                                            is_active: null
+                                        });
+
+                                        router.push(`/knowledge`);
+                                    }}
+                                >
+                                    <BadgeMinus />
+                                    Xóa bộ lọc
                                 </Button>
                             </div>
                         </section>
@@ -452,7 +468,7 @@ export default function KnowledgePage() {
                         )}
                     </>
                 )}
-            </div>
+            </div >
             <AlertDialog open={openAlertDialog} onOpenChange={setOpenAlertDialog}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
