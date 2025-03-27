@@ -1,25 +1,25 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
+import React, { useEffect, useState } from 'react'
 import { Separator } from '@/components/ui/separator';
 import { Hash } from 'lucide-react';
 import Image from 'next/image';
-import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast';
 import Zoom from 'react-medium-image-zoom'
 import 'react-medium-image-zoom/dist/styles.css'
 
-interface SectionProps {
+interface ShareSectionProps {
     id: string;
     title: string;
     children?: React.ReactNode;
 }
 
-export const ShareableSection: React.FC<SectionProps> = ({
+const ShareableSection: React.FC<ShareSectionProps> = ({
     id,
     title,
     children
 }) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [isLinkCopied, setIsLinkCopied] = useState(false);
 
     // Hàm copy link section động
@@ -87,7 +87,7 @@ export const ShareableSection: React.FC<SectionProps> = ({
 };
 
 
-export default function DocsPage() {
+export default function TutorialPage() {
     const currentDate = new Date();
     const updateDate = new Date(currentDate.setDate(currentDate.getDate() - 5));
     const formattedDate = updateDate.toLocaleDateString('vi-VN');

@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-'use client'
+'use client';
 
 import { activeKnowledge, deleteKnowledgeReourceId, getKnowledgeResource } from '@/api/knowledge/knowledge.service'
 import { Button } from '@/components/ui/button'
 import { KnowledgeBaseModel } from '@/types/models/knowledge.model'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { Suspense, useEffect, useMemo, useState } from 'react'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -44,7 +44,7 @@ import KnowledgeViewSwitcher from './components/card_table_view'
 const Lottie = dynamic(() => import("react-lottie"), { ssr: false });
 
 
-export default function KnowledgePage() {
+function KnowledgePageContent() {
     const defaultOptions = {
         loop: true,
         autoplay: true,
@@ -78,16 +78,28 @@ export default function KnowledgePage() {
     const itemsPerPage = 9;
 
     const router = useRouter();
-    const searchParams = useSearchParams();
 
-    const [searchParamsState, setSearchParamsState] = useState({
-        resource_id: searchParams.get("resource_id") || "",
-        categories_id: searchParams.get("categories_id") || "",
-        is_active: searchParams.get("is_active") === "true" ? true
-            : searchParams.get("is_active") === "false" ? false
-                : null // Dùng null thay vì ""
+    const searchParams = useSearchParams();
+    const [searchParamsState, setSearchParamsState] = useState<{
+        resource_id: string;
+        categories_id: string;
+        is_active: boolean | null;
+    }>({
+        resource_id: "",
+        categories_id: "",
+        is_active: null,
     });
 
+
+    useEffect(() => {
+        setSearchParamsState({
+            resource_id: searchParams.get("resource_id") || "",
+            categories_id: searchParams.get("categories_id") || "",
+            is_active: searchParams.get("is_active") === "true" ? true
+                : searchParams.get("is_active") === "false" ? false
+                    : null
+        });
+    }, [searchParams]);
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -351,6 +363,7 @@ export default function KnowledgePage() {
                                     <BadgeMinus />
                                     Xóa bộ lọc
                                 </Button>
+
                             </div>
                         </section>
                         <KnowledgeViewSwitcher
@@ -485,4 +498,12 @@ export default function KnowledgePage() {
             </AlertDialog>
         </>
     )
+}
+
+export default function KnowledgePage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <KnowledgePageContent />
+        </Suspense>
+    );
 }

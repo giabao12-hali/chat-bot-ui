@@ -59,7 +59,7 @@ export const data = {
     },
     {
       title: "Tài liệu hướng dẫn",
-      url: "/docs",
+      url: "/tutorial",
       icon: BookMarked
     }
   ],
