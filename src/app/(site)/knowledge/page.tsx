@@ -31,7 +31,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-// import { SearchIcon } from '@/components/ui/search'
 import { CategoryBaseModel } from '@/types/models/category.model'
 import { ResourceModel } from '@/types/models/resource.model'
 import { getCategories } from '@/api/category/category.service'

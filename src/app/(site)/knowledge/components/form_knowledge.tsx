@@ -111,14 +111,24 @@ export default function FormKnowledge() {
             created_by: userId,
         }
 
-        toast.promise(
-            insertByText(requestData),
-            {
-                loading: "Đang thêm kiến thức...",
-                success: "Thêm kiến thức thành công!",
-                error: (error: any) => error.message || "Thêm mới thất bại, vui lòng thử lại sau",
-            }
-        );
+        let countdown = 4;
+        const toastId = toast.loading("Đang thêm mới kiến thức...")
+
+        insertByText(requestData)
+            .then(() => {
+                const interval = setInterval(() => {
+                    countdown--;
+                    toast.success(`Thêm mới thành công! Đang reload sau ${countdown}s...`, { id: toastId });
+
+                    if(countdown <= 0) {
+                        clearInterval(interval);
+                        location.reload();
+                    }
+                }, 1000);
+            })
+            .catch((error: any) => {
+                toast.error(error.message || "Thêm mới kiến thức thất bại, vui lòng thử lại sau", { id: toastId });
+            })
     }
 
     function onSubmitUrl(data: z.infer<typeof urlSchema>) {

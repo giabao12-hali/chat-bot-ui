@@ -43,14 +43,24 @@ export default function FormCategory() {
             user_id: userId
         }
 
-        toast.promise(
-            insertCategory(requestData),
-                    {
-                        loading: "Đang thêm mới danh mục",
-                        success: "Thêm mới danh mục thành công",
-                        error: (error: any) => error.message || "Thêm mới danh mục thất bại, vui lòng thử lại sau"
+        let countdown = 4;
+        const toastId = toast.loading("Đang thêm mới danh mục...")
+
+        insertCategory(requestData)
+            .then(() => {
+                const interval = setInterval(() => {
+                    countdown--;
+                    toast.success(`Thêm mới thành công! Đang reload sau ${countdown}s...`, { id: toastId });
+
+                    if (countdown <= 0) {
+                        clearInterval(interval);
+                        location.reload(); // Reload trang khi countdown kết thúc
                     }
-                )
+                }, 1000);
+            })
+            .catch((error: any) => {
+                toast.error(error.message || "Thêm mới danh mục thất bại, vui lòng thử lại sau", { id: toastId });
+            });
     }
 
     return (
@@ -87,6 +97,7 @@ export default function FormCategory() {
                                         </FormLabel>
                                         <FormControl>
                                             <AutosizeTextarea
+                                                maxHeight={200}
                                                 {...field}
                                                 placeholder='Nhập mô tả'
                                             />

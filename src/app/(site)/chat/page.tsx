@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { chatAISm } from "@/api/chat/chat.service";
-import ReactMarkdown from "react-markdown";
 import { AutosizeTextarea, AutosizeTextAreaRef } from "@/components/ui/autosize-textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -25,6 +24,10 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { Atom, Binoculars } from "lucide-react";
+
+import rehypeRaw from "rehype-raw";
+import remarkGfm from "remark-gfm";
+import Markdown from "react-markdown";
 
 interface Message {
     id: number;
@@ -186,7 +189,7 @@ export default function ChatPage() {
                                                 )}
                                                 <div>
                                                     <div
-                                                        className={`p-3 max-w-sm ${msg.sender === "user"
+                                                        className={`p-3 ${msg.sender === "user"
                                                             ? "bg-blue-500 text-white rounded-s-lg rounded-br-lg"
                                                             : "bg-gray-300 text-black dark:bg-gray-700 dark:text-white rounded-e-lg rounded-bl-lg"
                                                             }`}
@@ -194,9 +197,14 @@ export default function ChatPage() {
                                                         {msg.sender === "bot" ? (
                                                             <>
                                                                 <p className="font-semibold text-sm">Vietravel - Chatbot AI</p>
-                                                                <ReactMarkdown>
-                                                                    {msg.text}
-                                                                </ReactMarkdown>
+                                                                <div className="prose">
+                                                                    <Markdown
+                                                                        remarkPlugins={[remarkGfm]}
+                                                                        rehypePlugins={[rehypeRaw]}
+                                                                    >
+                                                                        {msg.text}
+                                                                    </Markdown>
+                                                                </div>
                                                             </>
                                                         ) : (
                                                             msg.text
@@ -255,7 +263,7 @@ export default function ChatPage() {
                                             <>
                                                 <div>
                                                     <div
-                                                        className={`p-3 max-w-sm ${msg.sender === "user"
+                                                        className={`p-3 ${msg.sender === "user"
                                                             ? "bg-blue-500 text-white rounded-s-lg rounded-br-lg"
                                                             : "bg-gray-300 text-black dark:bg-gray-700 dark:text-white rounded-e-lg rounded-bl-lg"
                                                             }`}
@@ -263,9 +271,12 @@ export default function ChatPage() {
                                                         {msg.sender === "bot" ? (
                                                             <>
                                                                 <p className="font-semibold text-sm">Vietravel - Chatbot AI</p>
-                                                                <ReactMarkdown>
+                                                                <Markdown
+                                                                    remarkPlugins={[remarkGfm]}
+                                                                    rehypePlugins={[rehypeRaw]}
+                                                                >
                                                                     {msg.text}
-                                                                </ReactMarkdown>
+                                                                </Markdown>
                                                             </>
                                                         ) : (
                                                             msg.text

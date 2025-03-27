@@ -127,3 +127,23 @@
     @apply bg-background text-foreground;
   }
 }
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  @apply rounded-lg overflow-hidden;
+}
+
+.prose th, .prose td {
+  @apply border border-gray-300 dark:border-gray-600 p-2 text-left p-4;
+}
+
+.prose th {
+  @apply bg-gray-200 dark:bg-gray-800 font-bold;
+}
+
+.prose td {
+  @apply bg-white dark:bg-gray-900;
+}
