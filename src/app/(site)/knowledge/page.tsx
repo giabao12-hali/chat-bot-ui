@@ -3,8 +3,6 @@
 
 import { activeKnowledge, deleteKnowledgeReourceId, getKnowledgeResource, getKnowledgeResourceAll } from '@/api/knowledge/knowledge.service'
 import { Button } from '@/components/ui/button'
-import { DeleteIcon } from '@/components/ui/delete'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { KnowledgeBaseModel } from '@/types/models/knowledge.model'
 import React, { useEffect, useMemo, useState } from 'react'
 import {
@@ -19,13 +17,11 @@ import {
 } from "@/components/ui/alert-dialog"
 import toast from 'react-hot-toast'
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
-import Link from 'next/link'
 import { Plus } from 'lucide-react'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import FormKnowledge from './components/form_knowledge'
 import { useMediaQuery } from '@/hooks/use-media-query'
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer'
-import { CheckIcon } from '@/components/ui/check'
 import { Separator } from '@/components/ui/separator'
 import {
     Select,
@@ -36,7 +32,6 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { SearchIcon } from '@/components/ui/search'
-import { Checkbox } from '@/components/ui/checkbox'
 import { CategoryBaseModel } from '@/types/models/category.model'
 import { ResourceModel } from '@/types/models/resource.model'
 import { getCategories } from '@/api/category/category.service'
@@ -45,6 +40,7 @@ import { useRouter } from 'next/navigation'
 
 import noDataAnimation from '@/components/presentation/animations/no-data.animation.json'
 import dynamic from 'next/dynamic'
+import KnowledgeViewSwitcher from './components/card_table_view'
 const Lottie = dynamic(() => import("react-lottie"), { ssr: false });
 
 
@@ -319,32 +315,20 @@ export default function KnowledgePage() {
                                         </SelectGroup>
                                     </SelectContent>
                                 </Select>
-                                <div className="flex items-center space-x-2">
-                                    <Checkbox
-                                        id="active"
-                                        checked={searchParams.is_active}
-                                        onCheckedChange={(checked) => setSearchParams((prev: any) => ({ ...prev, is_active: checked === true }))}
-                                    />
-                                    <label
-                                        htmlFor="active"
-                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                    >
-                                        Kích hoạt
-                                    </label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <Checkbox
-                                        id="active"
-                                    // checked={searchParams.is_active}
-                                    // onCheckedChange={(checked) => setSearchParams((prev: any) => ({ ...prev, is_active: checked === true }))}
-                                    />
-                                    <label
-                                        htmlFor="active"
-                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                    >
-                                        Chưa kích hoạt
-                                    </label>
-                                </div>
+                                <Select>
+                                    <SelectTrigger className="w-52">
+                                        <SelectValue placeholder="Kích hoạt" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectItem value='0'>
+                                                --Tất cả--
+                                            </SelectItem>
+                                            <SelectItem value="active">Kích hoạt</SelectItem>
+                                            <SelectItem value="notActive">Chưa kích hoạt</SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
                             </div>
                             <div className="flex justify-center items-center">
                                 <Button size={'sm'} variant={'outline'} className='cursor-pointer' onClick={handleSearch}>
@@ -353,90 +337,14 @@ export default function KnowledgePage() {
                                 </Button>
                             </div>
                         </section>
-                        <div className="grid auto-rows-min gap-4 md:grid-cols-3 grid-cols-1">
-                            {paginatedData
-                                .map((item, index) => (
-                                    <div className='cursor-pointer' key={index}>
-                                        <div
-                                            className="rounded-xl border border-solid border-foreground/50 p-4 space-y-2 transition-all ease-in-out hover:shadow-xl hover:border-foreground hover:-translate-1.5"
-                                        >
-                                            <div className='space-y-0.5'>
-                                                <TooltipProvider>
-                                                    <Tooltip>
-                                                        <TooltipTrigger className='cursor-pointer'>
-                                                            <h1 className='font-semibold text-foreground text-left' onClick={() => handleKnowledgeDetail(item.id)}>
-                                                                {item.title}
-                                                            </h1>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                            <p>Xem chi tiết</p>
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                </TooltipProvider>
-                                                <h2 className='text-muted-foreground text-xs truncate'>
-                                                    Đường dẫn: {' '}
-                                                    {item.url ? (
-                                                        <Link href={item.url} target='_blank' className='hover:text-blue-500 transition-all ease-in-out'>
-                                                            {item.url}
-                                                        </Link>
-                                                    ) : (
-                                                        <span className="text-muted-foreground">Không có đường dẫn</span>
-                                                    )}
-                                                </h2>
-                                                <p className='text-muted-foreground text-xs'>
-                                                    Kiến thức thuộc danh mục:&nbsp;
-                                                    {categories.find((category) => category.id === item.category_id)?.name || "Không xác định"}
-                                                </p>
-                                                <p className='text-muted-foreground text-xs'>
-                                                    Trạng thái:&nbsp;
-                                                    <span className={`${item.is_active ? 'text-green-500' : 'text-red-500'}`}>
-                                                        {item.is_active ? 'Đang hoạt động' : 'Không hoạt động'}
-                                                    </span>
-                                                </p>
-                                            </div>
-                                            <div className="flex justify-end items-center space-x-2">
-                                                {item.is_active === 0 && (
-                                                    <Tooltip>
-                                                        <TooltipProvider>
-                                                            <TooltipTrigger asChild>
-                                                                <Button
-                                                                    size={'icon'}
-                                                                    variant={'outline'}
-                                                                    onClick={() => handleActiveKnowledge(item.id)}
-                                                                >
-                                                                    <CheckIcon />
-                                                                </Button>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent>
-                                                                <p>Kích hoạt kiến thức</p>
-                                                            </TooltipContent>
-                                                        </TooltipProvider>
-                                                    </Tooltip>
-                                                )}
-                                                <TooltipProvider>
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <Button
-                                                                variant={'destructive'}
-                                                                size={"icon"}
-                                                                onClick={() => {
-                                                                    setSelectedId(item.id);
-                                                                    setOpenAlertDialog(true);
-                                                                }}
-                                                            >
-                                                                <DeleteIcon />
-                                                            </Button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                            <p>Xóa</p>
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                </TooltipProvider>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                        </div>
+                        <KnowledgeViewSwitcher
+                            paginatedData={paginatedData}
+                            categories={categories}
+                            handleKnowledgeDetail={handleKnowledgeDetail}
+                            handleActiveKnowledge={handleActiveKnowledge}
+                            setSelectedId={setSelectedId}
+                            setOpenAlertDialog={setOpenAlertDialog}
+                        />
                         {paginatedData.length === 0 && (
                             <>
                                 <Lottie

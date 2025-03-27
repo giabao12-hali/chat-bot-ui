@@ -1,4 +1,5 @@
 import {
+  BookMarked,
   House,
   Library,
   LifeBuoy,
@@ -56,6 +57,11 @@ export const data = {
       url: "/faqs",
       icon: TableOfContents,
     },
+    {
+      title: "Tài liệu hướng dẫn",
+      url: "/docs",
+      icon: BookMarked
+    }
   ],
   projects: [
     {
