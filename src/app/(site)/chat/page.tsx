@@ -126,7 +126,7 @@ export default function ChatPage() {
 
     return (
         <>
-            <div className="flex items-center w-full p-4 sticky top-0">
+            <div className="flex items-center w-full p-4 sticky top-0 z-10 bg-background">
                 <Select defaultValue="knowledge">
                     <SelectTrigger>
                         <SelectValue placeholder="Chọn model AI" />
@@ -271,12 +271,14 @@ export default function ChatPage() {
                                                         {msg.sender === "bot" ? (
                                                             <>
                                                                 <p className="font-semibold text-sm">Vietravel - Chatbot AI</p>
-                                                                <Markdown
-                                                                    remarkPlugins={[remarkGfm]}
-                                                                    rehypePlugins={[rehypeRaw]}
-                                                                >
-                                                                    {msg.text}
-                                                                </Markdown>
+                                                                <div className="prose">
+                                                                    <Markdown
+                                                                        remarkPlugins={[remarkGfm]}
+                                                                        rehypePlugins={[rehypeRaw]}
+                                                                    >
+                                                                        {msg.text}
+                                                                    </Markdown>
+                                                                </div>
                                                             </>
                                                         ) : (
                                                             msg.text
