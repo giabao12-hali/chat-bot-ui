@@ -164,7 +164,7 @@ export default function ChatPage() {
                         </div>
                     ) : (
                         <div className="flex-1 flex flex-col justify-end">
-                            <div className="space-y-8">
+                            <div className="flex flex-col gap-8 overflow-hidden max-w-full w-full">
                                 {messages.map((msg) => (
                                     <div
                                         key={msg.id}
@@ -261,7 +261,7 @@ export default function ChatPage() {
                                             </>
                                         ) : (
                                             <>
-                                                <div>
+                                                <>
                                                     <div
                                                         className={`p-3 ${msg.sender === "user"
                                                             ? "bg-blue-500 text-white rounded-s-lg rounded-br-lg"
@@ -271,7 +271,7 @@ export default function ChatPage() {
                                                         {msg.sender === "bot" ? (
                                                             <>
                                                                 <p className="font-semibold text-sm">Vietravel - Chatbot AI</p>
-                                                                <div className="prose">
+                                                                <div className="prose w-full max-w-xs break-words">
                                                                     <Markdown
                                                                         remarkPlugins={[remarkGfm]}
                                                                         rehypePlugins={[rehypeRaw]}
@@ -284,7 +284,7 @@ export default function ChatPage() {
                                                             msg.text
                                                         )}
                                                     </div>
-                                                    {msg.sender === "bot" && (
+                                                    {/* {msg.sender === "bot" && (
                                                         <div className="flex justify-start items-center mt-2">
                                                             <Tooltip>
                                                                 <TooltipProvider>
@@ -317,8 +317,8 @@ export default function ChatPage() {
                                                                 </TooltipProvider>
                                                             </Tooltip>
                                                         </div>
-                                                    )}
-                                                </div>
+                                                    )} */}
+                                                </>
                                             </>
                                         )}
                                     </div>

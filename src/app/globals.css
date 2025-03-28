@@ -129,13 +129,14 @@
 }
 
 .prose table {
-  width: 5px;
-  border-collapse: collapse;
-  margin: auto;
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: nowrap;
   margin-top: 10px;
   margin-bottom: 10px;
-
-  overflow-x: auto;
+  @apply rounded-lg;
 }
 
 .prose th, .prose td {
